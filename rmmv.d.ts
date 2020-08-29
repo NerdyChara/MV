@@ -3887,6 +3887,22 @@ declare abstract class _Window extends PIXI.Container {
     active: boolean;
 
     /**
+     * The visibility of the frame.
+     *
+     * @property 
+     * @type boolean
+     */   
+    frameVisible: boolean;
+
+    /**
+     * The visibility of the cursor.
+     *
+     * @property 
+     * @type boolean
+     */
+    cursorVisible: boolean;
+
+    /**
      * The visibility of the down scroll arrow.
      *
      * @property downArrowVisible
@@ -3925,6 +3941,15 @@ declare abstract class _Window extends PIXI.Container {
      * @type Bitmap
      */
     contents: Bitmap;
+
+
+    /**
+     * The bitmap used for the window contents background.
+     *
+     * @property contentsBack
+     * @type Bitmap
+     */    
+    contentsBack: Bitmap;
 
     /**
      * The width of the window in pixels.
@@ -3990,6 +4015,34 @@ declare abstract class _Window extends PIXI.Container {
      */
     openness: number;
 
+
+    /**
+     * The width of the content area in pixels.
+     *
+     * @readonly
+     * @type number
+     * @property Window#innerWidth
+     */
+    innerWidth: number;
+
+    /**
+     * The height of the content area in pixels.
+     *
+     * @readonly
+     * @type number
+     * @property innerHeight
+     */    
+    innerHeight : number;
+
+    /**
+     * The rectangle of the content area.
+     *
+     * @readonly
+     * @property innerRect
+     * @type Rectangle
+     */    
+    innerRect : Rectangle;
+
     /**
      * The visibility of the sprite.
      *
@@ -4039,6 +4092,13 @@ declare abstract class _Window extends PIXI.Container {
     constructor();
 
     /**
+     * Destroys the window.
+     * 
+     * @method destroy
+     */    
+    destroy(): void;
+
+    /**
      * Updates the window for each frame.
      *
      * @method update
@@ -4083,6 +4143,25 @@ declare abstract class _Window extends PIXI.Container {
      */
     setCursorRect(x?: number, y?: number, width?: number, height?: number): void;
 
+
+    /**
+     * Moves the cursor position by the given amount.
+     *
+     * @method moveCursorBy
+     * @param {number} x - The amount of horizontal movement.
+     * @param {number} y - The amount of vertical movement.
+     */    
+    moveCursorBy(x: number, y : number): void;
+
+    /**
+     * Moves the inner children by the given amount.
+     *
+     * @method moveInnerChildrenBy
+     * @param {number} x - The amount of horizontal movement.
+     * @param {number} y - The amount of vertical movement.
+     */
+    moveInnerChildrenBy(x: number, y: number): void;
+
     /**
      * Changes the color of the background.
      *
@@ -4121,6 +4200,16 @@ declare abstract class _Window extends PIXI.Container {
      */
     addChildAt(child: PIXI.DisplayObject, index: number): PIXI.DisplayObject;
 
+
+    /**
+     * Adds a child to the client area.
+     *
+     * @method addInnerChild
+     * @param {PIXI.DisplayObject} child - The child to add.
+     * @returns {PIXI.DisplayObject} The child that was added.
+     */    
+    addInnerChild(child: PIXI.DisplayObject): PIXI.DisplayObject;
+
     /**
      * Removes a child from the container.
      *
@@ -4144,6 +4233,14 @@ declare abstract class _Window extends PIXI.Container {
      * @private
      */
     updateTransform(): void;
+
+    /**
+     * Draws the window shape into PIXI.Graphics object. Used by WindowLayer.
+     *
+     * @method drawShape
+     * @param {PIXI.Graphics} 
+     */    
+    drawShape(graphics: PIXI.Graphics): void;
 
     protected _isWindow: boolean;
     protected _windowskin: Bitmap;
@@ -4170,6 +4267,60 @@ declare abstract class _Window extends PIXI.Container {
      * @private
      */
     protected _createAllParts(): void;
+
+    /**
+     * @method _createContainer
+     * @private
+     */    
+    protected _createContainer(): void;
+
+    /**
+     * @method _createBackSprite
+     * @private
+     */    
+    protected _createBackSprite(): void;
+
+    /**
+     * @method _createFrameSprite
+     * @private
+     */    
+    protected _createFrameSprite(): void;
+
+    /**
+     * @method _createClientArea
+     * @private
+     */    
+    protected _createClientArea(): void;
+
+    /**
+     * @method _createContentsBackSprite
+     * @private
+     */    
+    protected _createContentsBackSprite(): void;
+
+    /**
+     * @method _createCursorSprite
+     * @private
+     */        
+    protected _createCursorSprite(): void;
+
+    /**
+     * @method _createContentsSprite
+     * @private
+     */        
+    protected _createContentsSprite(): void;
+
+    /**
+     * @method _createArrowSprites
+     * @private
+     */        
+    protected _createArrowSprites(): void;
+
+    /**
+     * @method _createPauseSignSprites
+     * @private
+     */        
+    protected _createPauseSignSprites(): void;
 
     /**
      * @method _onWindowskinLoad
@@ -4202,6 +4353,15 @@ declare abstract class _Window extends PIXI.Container {
     protected _refreshCursor(): void;
 
     /**
+     * @method _setRectPartsGeometry
+     * @param {Sprite} sprite
+     * @param {Rectangle} srect
+     * @param {Rectangle} drect
+     * @param {Number} m (margin)
+     */
+    protected _setRectPartsGeometry(sprite : Sprite, srect: Rectangle, drect: Rectangle, m: number): void;
+
+    /**
      * @method _refreshContents
      * @private
      */
@@ -4219,11 +4379,18 @@ declare abstract class _Window extends PIXI.Container {
      */
     protected _refreshPauseSign(): void;
 
+
+    protected _updateClientArea(): void;
+    protected _updateFrame(): void;
+    protected _updateContentsBack(): void;
+
     /**
      * @method _updateCursor
      * @private
      */
     protected _updateCursor(): void;
+
+    protected _makeCursorAlpha(): void;
 
     /**
      * @method _updateContents
@@ -4242,6 +4409,8 @@ declare abstract class _Window extends PIXI.Container {
      * @private
      */
     protected _updatePauseSign(): void;
+
+    protected _updateFilterArea(): void;
 }
 
 
@@ -7309,6 +7478,11 @@ interface PluginManagerStatic {
     setParameters(name: string, parameters: {[key: string]: string}): void;
     loadScript(name: string): void;
     onError(e: Event): void;
+    makeUrl(filename: string): string;
+    checkErrors(): void;
+    throwLoadError(): void;
+    registerCommand(pluginName: string, commandName: string, func: ((args: any[]) => void)): void;
+    callCommand(thisArg: any, pluginName: string, commandName: string, args: any[]): void;
 }
 declare var PluginManager: PluginManagerStatic;
 
@@ -17251,8 +17425,26 @@ declare class Spriteset_Battle extends Spriteset_Base {
     isBusy(): boolean;
 }
 //=============================================================================
-// rpg_windows.js v1.5.0
+// rmmz_windows.js 0.95
 //=============================================================================
+
+namespace MZ {
+    declare class TextState {
+        text: string;
+        index: number;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        startX: number;
+        startY: number;
+        rtl: boolean;
+        buffer: string;
+        drawing: boolean;
+        outputWidth: number;
+        outputHeight: number;
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Window_Base
@@ -17265,43 +17457,8 @@ declare class Spriteset_Battle extends Spriteset_Base {
  * @class Window_Base
  * @extends {Window}
  */
-declare class Window_Base {
-  /**
-   * The standard icon width;
-   * default is 32.
-   * @protected
-   * @static
-   * @type {number}
-   * @memberof Window_Base
-   */
-  protected static _iconWidth: number;
-  /**
-   * The standard icon height;
-   * default is 32.
-   * @protected
-   * @static
-   * @type {number}
-   * @memberof Window_Base
-   */
-  protected static _iconHeight: number;
-  /**
-   * The standard face width;
-   * default is 144.
-   * @protected
-   * @static
-   * @type {number}
-   * @memberof Window_Base
-   */
-  protected static _faceWidth: number;
-  /**
-   * The standard face height;
-   * default is 144.
-   * @protected
-   * @static
-   * @type {number}
-   * @memberof Window_Base
-   */
-  protected static _faceHeight: number;
+declare class Window_Base extends Window {
+
   /**
    * The opening property; determines if
    * the window is opening.
@@ -17318,16 +17475,18 @@ declare class Window_Base {
    * @memberof Window_Base
    */
   protected _closing: boolean;
+  protected _dimmerSprite: Sprite;
 
   /**
    * Creates an instance of Window_Base.
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} width 
-   * @param {number} height 
+   * @param {Rectangle} 
    * @memberof Window_Base
    */
-  constructor(x: number, y: number, width: number, height: number);
+  constructor(rect: Rectangle);
+
+  destroy(options: Object): void;
+
+  checkRectObject(rect: Rectangle): void;
 
   /**
    * Returns the standard line height of the current window;
@@ -17336,42 +17495,15 @@ declare class Window_Base {
    * @memberof Window_Base
    */
   lineHeight(): number;
-  /**
-   * Returns the standard font face of the 
-   * game based on what language the game is in.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  standardFontFace(): string;
-  /**
-   * Returns the standard font size of the text
-   * in window; default is 28.
-   * @returns {number} 
-   * @memberof Window_Base
-   */
-  standardFontSize(): number;
-  /**
-   * Returns the standard padding of the window;
-   * default is 18.
-   * @returns {number} 
-   * @memberof Window_Base
-   */
-  standardPadding(): number;
-  /**
-   * Returns the text padding of the window;
-   * default is 6.
-   * @returns {number} 
-   * @memberof Window_Base
-   */
-  textPadding(): number;
-  /**
-   * Returns the standard back opacity of the window; this is the
-   * opacity of the area behind the window's text content.
-   * Default is 192.
-   * @returns {number} 
-   * @memberof Window_Base
-   */
-  standardBackOpacity(): number;
+
+  itemWidth(): number;
+
+  itemHeight(): number;
+
+  itemPadding(): number;
+
+  baseTextRect(): Rectangle;
+
   /**
    * Loads the window skin from the img/system directory.
    * 
@@ -17390,20 +17522,6 @@ declare class Window_Base {
    * @memberof Window_Base
    */
   updateBackOpacity(): void;
-  /**
-   * Returns the inner content width of the window.
-   * 
-   * @returns {number} 
-   * @memberof Window_Base
-   */
-  contentsWidth(): number;
-  /**
-   * Returns the inner content height of the window.
-   * 
-   * @returns {number} 
-   * @memberof Window_Base
-   */
-  contentsHeight(): number;
   /**
    * Returns the fitting height given a number of lines based on
    * the line height plus standard padding of the window.
@@ -17426,6 +17544,21 @@ declare class Window_Base {
    * @memberof Window_Base
    */
   createContents(): void;
+  destroyContents(): void;
+  /**
+   * Returns the inner content width of the window.
+   * 
+   * @returns {number} 
+   * @memberof Window_Base
+   */
+  contentsWidth(): number;
+  /**
+   * Returns the inner content height of the window.
+   * 
+   * @returns {number} 
+   * @memberof Window_Base
+   */
+  contentsHeight(): number;  
   /**
    * Resets the font settings of the window back to the
    * default.
@@ -17509,128 +17642,7 @@ declare class Window_Base {
    * @memberof Window_Base
    */
   deactivate(): void;
-  /**
-   * Returns a text color given a numbered index
-   * as a css color string; this index maps
-   * directly to the img/system/window.png colors
-   * by default.
-   * @param {number} n 
-   * @returns {*} 
-   * @memberof Window_Base
-   */
-  textColor(n: number): string;
-  /**
-   * Returns the normal color as a css
-   * color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  normalColor(): string;
-  /**
-   * Returns the system color as a
-   * css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
   systemColor(): string;
-  /**
-   * Returns the crisis color as a 
-   * css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  crisisColor(): string;
-  /**
-   * Returns the death color as a 
-   * css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  deathColor(): string;
-  /**
-   * Returns the gauage back color as 
-   * a css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  gaugeBackColor(): string;
-  /**
-   * Returns the hp gauge color 1 
-   * as a css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  hpGaugeColor1(): string;
-  /**
-   * Returns the hp gauge color 2 
-   * as a css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  hpGaugeColor2(): string;
-  /**
-   * Returns the mp gauge color 1
-   * as a css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  mpGaugeColor1(): string;
-  /**
-   * Returns the mp gauge color 2
-   * as a css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  mpGaugeColor2(): string;
-  /**
-   * Returns the mp cost color as a
-   * css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  mpCostColor(): string;
-  /**
-   * Returns the power up color as a
-   * css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  powerUpColor(): string;
-  /**
-   * Returns the power down color as a 
-   * css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  powerDownColor(): string;
-  /**
-   * Returns the tp gauge color 1 as a 
-   * css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  tpGaugeColor1(): string;
-  /**
-   * Returns tp gauge color 2 as a
-   * css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  tpGaugeColor2(): string;
-  /**
-   * Returns the tp cost color as a 
-   * css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  tpCostColor(): string;
-  /**
-   * Returns the pending color as a
-   * css color string.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  pendingColor(): string;
   /**
    * Returns the translucentOpacity for the window;
    * The default is 160.
@@ -17646,6 +17658,7 @@ declare class Window_Base {
    * @memberof Window_Base
    */
   changeTextColor(color: string): void;
+  changeOutlineColor(color: string): void;
   /**
    * Changes the paintOpacity (the opacity of the text drawn to the window);
    * if true the opacity is set to 255, otherwise the opacity is set to 160.
@@ -17653,6 +17666,14 @@ declare class Window_Base {
    * @memberof Window_Base
    */
   changePaintOpacity(enabled: boolean): void;
+  /**
+   * 
+   * @param {number} x 
+   * @param {number} y 
+   * @param {number} width 
+   * @param {number} height 
+   */
+  drawRect(x: number, y: number, width: number, height: number): void;
   /**
    * Given text or a number, draws the content to the window's contents
    * layer at the specified x and y coordinate within the max width.
@@ -17684,6 +17705,17 @@ declare class Window_Base {
    * @memberof Window_Base
    */
   drawTextEx(text: string, x: number, y: number): number;
+  
+  textSizeEx(text: string): {width: number, height: number};
+
+  createTextState(text: string, x: number, y: number, width: number): MZ.TextState;
+
+  processAllText(textState: MZ.TextState): void;
+
+  flushTextState(textState: MZ.TextState): void;
+
+  createTextBuffer(rtl: boolean): void;
+
   /**
    * Converts the escape characters and returns the text content
    * after processing the characters.
@@ -17711,57 +17743,55 @@ declare class Window_Base {
   /**
    * Process each character in the text when drawTextEx
    * is used to draw text.
-   * @param {MV.TextState} textState 
+   * @param {MZ.TextState} textState 
    * @memberof Window_Base
    */
-  processCharacter(textState: MV.TextState): void;
+  processCharacter(textState: MZ.TextState): void;
+
   /**
-   * Processes the normal characters in the text
-   * when drawTextEx is used to draw text.
-   * Normal characters are letters and numbers.
-   * @param {MV.TextState} textState 
-   * @memberof Window_Base
+   * 개행 문자나 텍스트 코드를 처리합니다.
+   * @param {MZ.TextState} textState 
+   * @param c 
    */
-  processNormalCharacter(textState: MV.TextState): void;
+  processControlCharacter(textState: MZ.TextState, c: string): void;
   /**
    * Processes new line when drawTextEx is used to draw text.
    * 
-   * @param {MV.TextState} textState 
+   * @param {MZ.TextState} textState 
    * @memberof Window_Base
    */
-  processNewLine(textState: MV.TextState): void;
-  /**
-   * Processes new page when drawTexttEx is used to draw text.
-   * 
-   * @param {MV.TextState} textState 
-   * @memberof Window_Base
-   */
-  processNewPage(textState: MV.TextState): void;
-  obtainEscapeCode(textState: MV.TextState): string;
+  processNewLine(textState: MZ.TextState): void;
+
+  obtainEscapeCode(textState: MZ.TextState): string;
   /**
    * Obtains the escape parameters from text codes in the text state
    * when drawTextEx is used to draw text.
-   * @param {MV.TextState} textState 
+   * @param {MZ.TextState} textState 
    * @returns {(number | string)} 
    * @memberof Window_Base
    */
-  obtainEscapeParam(textState: MV.TextState): number | string;
+  obtainEscapeParam(textState: MZ.TextState): number | string;
   /**
    * Processes escape characters when drawTextEx is used 
    * for drawing text.
    * @param {string} code 
-   * @param {MV.TextState} textState 
+   * @param {MZ.TextState} textState 
    * @memberof Window_Base
    */
-  processEscapeCharacter(code: string, textState: MV.TextState): void;
+  processEscapeCharacter(code: string, textState: MZ.TextState): void;
+  /**
+   * 텍스트 색상을 변경합니다.
+   * @param {number} colorIndex 
+   */
+  processColorChange(colorIndex: number): void;
   /**
    * Processes drawing an icon when drawTextEx is used for
    * drawing text.
    * @param {number} iconIndex 
-   * @param {MV.TextState} textState 
+   * @param {MZ.TextState} textState 
    * @memberof Window_Base
    */
-  processDrawIcon(iconIndex: number, textState: MV.TextState): void;
+  processDrawIcon(iconIndex: number, textState: MZ.TextState): void;
   /**
    * Makes the font bigger by a value of 12.
    * 
@@ -17778,12 +17808,18 @@ declare class Window_Base {
    * Calculates the text height of the textState (when using drawTextEx);
    * if all is set to true, all lines of text are calculated, otherwise
    * only a single line is processed.
-   * @param {MV.TextState} textState 
-   * @param {boolean} all 
+   * @param {MZ.TextState} textState 
    * @returns {number} 
    * @memberof Window_Base
    */
-  calcTextHeight(textState: any, all: boolean): number;
+  calcTextHeight(textState: MZ.TextState): number;
+  /**
+   * 텍스트 코드 처리 중에 최대 폰트 사이즈를 계산합니다.
+   * FS, \{, \}와 같은 텍스트 코드가 있으면 처리하여 폰트 크기에 반영합니다.
+   * @param {number} line 
+   * @return {number}
+   */
+  maxFontSizeInLine(line: number): number;
   /**
    * Draws an icon given the specified iconIndex at the specified
    * x and y coordinates. The Width and Height of the icon is based on the
@@ -17806,258 +17842,18 @@ declare class Window_Base {
    * @memberof Window_Base
    */
   drawCharacter(characterName: string, characterIndex: number, x: number, y: number): void;
-  /**
-   * Draws a gauge at the specified x and y coordinates within the given width.
-   * Color1 and Color2 represent the gradient as css color strings of the gauge.
-   * 
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} width 
-   * @param {number} rate 
-   * @param {string} color1 
-   * @param {string} color2 
-   * @memberof Window_Base
-   */
-  drawGauge(x: number, y: number, width: number, rate: number, color1: string, color2: string);
-  /**
-   * Returns the hp color as a css string.
-   * 
-   * @param {Game_Actor} actor 
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  hpColor(actor: Game_Actor): string;
-  /**
-   * Returns the mp color as a css color string.
-   * 
-   * @param {Game_Actor} actor 
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  mpColor(actor: Game_Actor): string;
-  /**
-   * Returns the tp color as a css color string.
-   * 
-   * @param {Game_Actor} actor 
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  tpColor(actor: Game_Actor): string;
-  drawActorCharacter(actor: Game_Actor, x: number, y: number): void;
-  /**
-   * Draws the actor face at the specified x and y coordinates within
-   * the given width.
-   * @param {Game_Actor} actor 
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} width 
-   * @param {number} height 
-   * @memberof Window_Base
-   */
-  drawActorFace(actor: Game_Actor, x: number, y: number, width: number, height: number): void;
-  /**
-   * Draws the actor name at the specified x and y coordinates within
-   * the given width.
-   * @param {Game_Actor} actor 
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} width 
-   * @memberof Window_Base
-   */
-  drawActorName(actor: Game_Actor, x: number, y: number, width: number): void;
-  /**
-   * Draws the actor class at the specified x and y coordinates
-   * within the given width.
-   * @param {Game_Actor} actor 
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} width 
-   * @memberof Window_Base
-   */
-  drawActorClass(actor: Game_Actor, x: number, y: number, width: number): void;
-  /**
-   * Draws the actor nickname at the specified x and y coordinates
-   * within the given width.
-   * @param {Game_Actor} actor 
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} width 
-   * @memberof Window_Base
-   */
-  drawActorNickname(actor: Game_Actor, x: number, y: number, width: number): void;
-  /**
-   * Draws the actor level at the specified x and y coordinates.
-   * 
-   * @param {Game_Actor} actor 
-   * @param {number} x 
-   * @param {number} y 
-   * @memberof Window_Base
-   */
-  drawActorLevel(actor: Game_Actor, x: number, y: number);
-  /**
-   * Draws the actor icons at the specified x and y coordinates
-   * within the given width.
-   * @param {Game_Actor} actor 
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} width 
-   * @memberof Window_Base
-   */
-  drawActorIcons(actor: Game_Actor, x: number, y: number, width: number): void;
-  /**
-   * Draws the current and max number at the specified x and y coordinate
-   * within the given width. Color1 represents the current number and color2
-   * represents the max number when the text is drawn.
-   * @param {number} current 
-   * @param {number} max 
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} width 
-   * @param {string} color1 
-   * @param {string} color2 
-   * @memberof Window_Base
-   */
-  drawCurrentAndMax(current: number, max: number, x: number, y: number, width: number, color1: string, color2: string): void;
-  /**
-   * Draws the actor hp at the specified x and y coordinates within
-   * the given width.
-   * @param {Game_Actor} actor 
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} width 
-   * @memberof Window_Base
-   */
-  drawActorHp(actor: Game_Actor, x: number, y: number, width: number): void;
-  /**
-   * Draws the actor mp at the specified x and y coordinates within
-   * the given width.
-   * @param {Game_Actor} actor 
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} width 
-   * @memberof Window_Base
-   */
-  drawActorMp(actor: Game_Actor, x: number, y: number, width: number): void;
-  /**
-   * Draws the actor tp at the specified x and y coordinates within the
-   * given width.
-   * @param {Game_Actor} actor 
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} width 
-   * @memberof Window_Base
-   */
-  drawActorTp(actor: Game_Actor, x: number, y: number, width: number): void;
-  /**
-   * Draws a simple status for the game actor passed into the method at the
-   * specified x and y coordinates within the given width.
-   * 
-   * @param {Game_Actor} actor 
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} width 
-   * @memberof Window_Base
-   */
-  drawActorSimpleStatus(actor: Game_Actor, x: number, y: number, width: number): void;
-  /**
-   * Draws the item name at the specified x and y coordinates within
-   * the given width.
-   * @param {RPG.BaseItem} item 
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} width 
-   * @memberof Window_Base
-   */
-  drawItemName(item: RPG.BaseItem, x: number, y: number, width: number): void;
-  /**
-   * Draws the currency value given at the specified x and y coordinates within
-   * the width given. Useful if you want to write your own custom currency value.
-   * @param {number} value 
-   * @param {string} unit 
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} width 
-   * @memberof Window_Base
-   */
+
+  drawItemName(item: RPG.Item, x: number, y: number, width: number): void;
   drawCurrencyValue(value: number, unit: string, x: number, y: number, width: number): void;
-  /**
-   * Changes the text color based on the powerUpColor, powerDownColor
-   * and normal color. powerUpColor is any number greater than 0, powerDownColor
-   * is any color less than 0, otherwise normal color is returned.
-   * @param {number} change 
-   * @memberof Window_Base
-   */
-  paramchangeTextColor(change: number): void;
-  /**
-   * Sets the background type of the window.
-   * 0 is 255 window opacity (standard).
-   * 1 is the window with background dimmer.
-   * Any other number changes the opacity
-   * to 0.
-   * @param {number} type 
-   * @memberof Window_Base
-   */
   setBackgroundType(type: number): void;
-  /**
-   * Shows the background dimmer sprite.
-   * 
-   * @memberof Window_Base
-   */
   showBackgroundDimmer(): void;
-  /**
-   * Hides the background dimmer sprite.
-   * 
-   * @memberof Window_Base
-   */
+  createDimmerSprite(): void;
   hideBackgroundDimmer(): void;
-  /**
-   * Updates the background dimmer sprite opacity based on the openness
-   * of the window.
-   * @memberof Window_Base
-   */
   updateBackgroundDimmer(): void;
-  /**
-   * Refreshes the bitmap attached to the dimmer sprite
-   * based on the window dimensions.
-   * @memberof Window_Base
-   */
   refreshDimmerBitmap(): void;
-  /**
-   * Color 1 of the dimmer sprite bitmap.
-   * for the gradient.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  dimColor1(): string;
-  /**
-   * Color 2 of the dimmer sprite bitmap
-   * for the gradient.
-   * @returns {string} 
-   * @memberof Window_Base
-   */
-  dimColor2(): string;
-  /**
-   * Returns the x coordinate of the mouse to
-   * a local window x coordinate.
-   * @param {number} x 
-   * @returns {number} 
-   * @memberof Window_Base
-   */
-  canvasToLocalX(x:number): number;
-  /**
-   * Returns the y coordinate of the mouse
-   * to a local window y coordinate.
-   * @param {number} y 
-   * @returns {number} 
-   * @memberof Window_Base
-   */
-  canvasToLocalY(y: number): number;
-  /**
-   * Reverses the face images of the 
-   * game party members.
-   * @memberof Window_Base
-   */
-  reserveFaceImages(): void;
+  playCursorSound(): void;
+  playOkSound(): void;
+  playBuzzerSound(): void;
 }
 
 //-----------------------------------------------------------------------------
@@ -19775,7 +19571,7 @@ declare class Window_Message extends Window_Base {
     protected _positionType: number;
     protected _waitCount: number;
     protected _faceBitmap: Bitmap;
-    protected _textState: MV.TextState;
+    protected _textState: MZ.TextState;
     protected _pauseSkip: boolean;
     protected _showFast: boolean;
     protected _lineShowFast: boolean;
@@ -19913,29 +19709,29 @@ declare class Window_Message extends Window_Base {
      */
     areSettingsChanged(): boolean;
     updateShowFast(): void;
-    newPage(textState: MV.TextState): void;
+    newPage(textState: MZ.TextState): void;
     loadMessageFace(): void;
     drawMessageFace(): void;
     newLineX(): number;
-    processNewLine(textState: MV.TextState): void;
-    processNewPage(textState: MV.TextState): void;
+    processNewLine(textState: MZ.TextState): void;
+    processNewPage(textState: MZ.TextState): void;
     /**
      * Returns true if there is no text left to display in the message
      * window.
-     * @param {MV.TextState} textState 
+     * @param {MZ.TextState} textState 
      * @returns {boolean} 
      * @memberof Window_Message
      */
-    isEndOfText(textState: MV.TextState): boolean;
+    isEndOfText(textState: MZ.TextState): boolean;
     /**
      * Returns true if the text state needs a new page to display text.
      * 
-     * @param {MV.TextState} textState 
+     * @param {MZ.TextState} textState 
      * @returns {boolean} 
      * @memberof Window_Message
      */
-    needsNewPage(textState: MV.TextState): boolean;
-    processEscapeCharacter(code: string, textState: MV.TextState): void;
+    needsNewPage(textState: MZ.TextState): boolean;
+    processEscapeCharacter(code: string, textState: MZ.TextState): void;
     /**
      * Starts a wait for the message window.
      * 
