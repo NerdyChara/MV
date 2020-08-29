@@ -2,15 +2,15 @@
 // RS_Window_KorNameEdit.js
 // ---------------------------------------------------------------
 // The MIT License
-// Copyright (c) 2015 biud436
+// Copyright (c) 2020 biud436
 // ---------------------------------------------------------------
 // Free for commercial and non commercial use.
 //================================================================
 /*:
- * @plugindesc This plugin allows you to type in korean in the Name Input Proccessing <RS_Window_KorNameEdit>
- *
+ * @target MZ
+ * @plugindesc (v0.5.2) This plugin allows you to type in korean in the Name Input Proccessing <RS_Window_KorNameEdit>
  * @author biud436
- * @since 2015.10.19
+ * @url https://biud436.tistory.com/
  *
  * @param windowWidth
  * @desc Directly specify the width of a window for editing name.
@@ -129,64 +129,92 @@
  * @type boolean
  * @desc Specify whther the face image shows.
  * @default true
+ * @on true
+ * @off false
  * 
  * @help
- * This plugin provides a keyboard that allows you to type in korean
- * or other native language in the Name Input Proccessing.
+ * # Credit and Thanks
+ * Biud436
  * 
- * ============================================================================
- * Plugin Commands
- * ============================================================================
+ * # Terms of Use
+ * Free for commercial and non-commercial use.
  * 
- * These plugin commands can change the properties of the name window. 
+ * # License
+ * The MIT License (MIT)
  * 
- * KNE width number
- * KNE center true/false
- * KNE outlineWidth number
- * KNE outlineColor string
- * KNE fontColor string
- * KNE fontSize number
- * KNE opacity number
- * KNE askText string
- * 
- * if you want to type a name is to 9 characters or more, you must call at the following plugin command.
- * 
- * OpenXNameInput leader 9
- *
- * ============================================================================
+ * ============================================
  * Change Log
- * ============================================================================
- * 2016.03.05 (v1.3.3) - Fixed the class structure.
- * 2016.03.22 (v1.4.0) - Fixed a bug that causes a serious problem.
- * 2016.04.05 (v1.5.0) - Fixed a bug that causes to delete the text automatically
- * when you can type Hangul text of length less than 2.
- * 2016.06.18 (v1.6.0) - Fixed the inheritance structure, and the parameter called 'askText'.
- * 2016.08.09 (v1.6.1) - Fixed shouldPreventDefault function of Input class.
- * 2016.12.20 (v1.6.2) : Added Default CharWidth parameter.
- * That is because this plugin has a bug that 'navigator.language' has always returned
- * 'en-US' due to a bug of crosswalk-10.39.235.16 xwalk library. So I added this
- * to solve the problem of returning the wrong character width.
- * 2017.01.13 (v1.6.3) - Fixed a bug that didn't hide the status bar after firing onchange event on android.
- * 2017.06.07 (v1.6.4) :
- * - Added a new feature that can change a default background image.
- * - Fixed the issue that is not changed the text after pressing the cancel button on an Android.
- * - Now it does not get the focus of a text editor unless pressing the edit button.
- * 2017.09.15 (v1.6.5) :
- * - Added a new feature that pre-sets the default name when the name processing.
- * 2018.10.26 (v1.6.6) :
- * - Added the alert window. 
- * 2018.11.08 (v1.6.7) :
- * - Actor's name can change the same as previous name. 
- * - Now command buttons are show up only in mobile devices. 
- * - Fixed the position of the edit window.
- * 2019.05.30 (v1.6.8) :
- * - Added the feature that the name can type as 9 characters or more.
- * 2019.11.23 (v1.6.9) :
- * - Added a new feature that can select whether input method editor shows on the screen. 
- * its feature can be resolved many of issues on the mobile device.
- * - Added a new feature that can hide the face image on the name edit window.
- * 2020.07.14 (v1.6.10) :
- * - Fixed the issue, https://github.com/biud436/MV/issues/18
+ * ============================================
+ * 2020.08.07 (v0.5.2) :
+ * - Fixed the bug that can't hide IME.
+ * 
+ * @command KNE
+ * @text Change Plugin Parameters
+ * @desc This plugin command allows you to change plugin parameters.
+ * 
+ * @arg width
+ * @desc Specify the width of name edit window.
+ * @default 580
+ * 
+ * @arg center
+ * @type boolean
+ * @desc Sets whether the name window will be placed to center of the screen.
+ * @default true
+ * @on true
+ * @off false
+ * 
+ * @arg outlineWidth
+ * @type number
+ * @desc Specify the outline width.
+ * @default 1
+ * @min 0
+ * 
+ * @arg outlineColor
+ * @type string
+ * @desc Specify the outline color as you want.
+ * @default black
+ * 
+ * @arg textColor
+ * @text Text Color
+ * @type string
+ * @desc Specify the desired text color (default : white)
+ * @default white
+ * 
+ * @arg fontSize
+ * @type number
+ * @desc Specify the font size (default : 28)
+ * @default 28
+ * @min 0
+ * 
+ * @arg opacity
+ * @type number
+ * @desc Specify the window opacity (default : 225)
+ * @default 225
+ * @min 0
+ * @max 255
+ * 
+ * @arg askText
+ * @type string
+ * @desc Specify the default text hint text.
+ * @default Please enter the name
+ * 
+ * @command OpenXNameInput
+ * @text Open XName Input
+ * @desc Type the name using IME
+ * 
+ * @arg actorId
+ * @type number
+ * @desc if -1, actor's id sets as an id of leader.
+ * @default -1
+ * @min -1
+ * @max 4000
+ * 
+ * @arg digits
+ * @type number
+ * @desc Specify the size of the name (default : 6)
+ * @default 6
+ * @min 6
+ * 
  */
 /*~struct~TextBox:
  * 
@@ -234,9 +262,10 @@
  * 
  */
 /*:ko
- * RS_Window_KorNameEdit.js
- * @plugindesc 한글 이름 입력 처리 플러그인입니다. <RS_Window_KorNameEdit>
+ * @target MZ
+ * @plugindesc 한글 이름 입력 플러그인 <RS_Window_KorNameEdit>
  * @author 러닝은빛(biud436)
+ * @url https://biud436.blog.me
  * 
  * @param windowWidth
  * @text 창 폭 (가로 크기)
@@ -382,85 +411,91 @@
  * @off 감추기
  * 
  * @help
- * 화면에서 보이지 않는 <input> 폼을 생성하여 텍스트를 직접 입력 받을 수 있게 하는 플러그인입니다.
- *
- * 안드로이드 기기에서 상태바 관련 버그가 있으신 분들은 다음 플러그인으로
- * 대체해주시기 바랍니다 :
- *
- * https://github.com/biud436/MV/raw/master/RS_Window_KoreanNameInput.js
- *
- * ============================================================================
- * 플러그인 명령
- * ============================================================================
- *
- * KNE 폭 숫자
+ * MZ용 한글 이름 입력 플러그인입니다.
  * 
- * 윈도우의 가로 크기를 변경하려면 위 명령을 사용해주세요.
- * 숫자 부분을 원하는 값으로 변경해야 합니다.
- * 숫자 값은 0보다 커야 합니다.
+ * 한글 이름 입력 방식에는 크게는 유니코드와 키보드 이벤트를 이용하여 초성, 중성, 종성을 직접 조합하는 방법이 있고,
+ * 유니티나 cocos2d-x 같은 게임 엔진에서 사용하는 방법처럼 IME를 이용하는 방법이 있습니다.
  * 
- * KNE 중앙정렬 true/false
+ * 본 플러그인은 IME를 사용합니다.
+ * IME는 인터넷 게시판에서 글을 작성할 때와 동일한 한글 조합 기능을 제공하며 한국어, 중국어, 일본어 등 여러가지 언어도 입력할 수 있습니다.
  * 
- * 이름 입력 윈도우는 기본적으로 상단에 생성됩니다.
- * 창을 정확히 중앙으로 옮기고 싶다면 "KNE 중앙정렬 true"을 호출하세요.
+ * IME는 화면에서는 보이지 않는 <input> 폼을 생성하여 처리합니다.
  * 
- * KNE 테두리크기 숫자
- * KNE 테두리색상 문자열
- * KNE 폰트색상 문자열
- * KNE 폰트크기 숫자
+ * @command KNE
+ * @text 플러그인 매개변수 변경
+ * @desc 플러그인 매개변수를 변경할 수 있습니다.
  * 
- * 위 플러그인 명령은 폰트 패밀리를 제외한 나머지 폰트 설정을 변경할 수 있습니다.
- * 폰트 패밀리는 플러그인 매개변수에서 변경이 가능합니다.
+ * @arg width
+ * @text 폭
+ * @desc 이름 편집 윈도우의 폭을 지정하세요 (기본값 : 580)
+ * @default 580
  * 
- * KNE 투명도 숫자
+ * @arg center
+ * @text 중앙 정렬
+ * @type boolean
+ * @desc 창을 정확히 중앙에 정렬하고자 한다면 참으로 설정하세요
+ * @default true
+ * @on 참
+ * @off 거짓
  * 
- * 투명도는 0에서 완전 투명하고 255에서 완전 불투명합니다.
- * 완전 투명할 경우, 창의 기본 배경과 프레임이 사라지고 글자만 남게 됩니다.
- * 글자만 덩그라니 놓일 경우, 기본 배경 이미지와 잘 겹쳐지게 됩니다.
- * 플러그인 매개변수에서 기본 배경 이미지를 다른 것으로 바꿨을 경우 유용합니다.
+ * @arg outlineWidth
+ * @text 테두리 굵기
+ * @type number
+ * @desc 폰트의 테두리 굵기를 설정하세요 (기본값 : 1)
+ * @default 1
+ * @min 0
  * 
- * KNE 텍스트 문자열
+ * @arg outlineColor
+ * @text 테두리 색상
+ * @type string
+ * @desc 원하는 테두리 색상을 지정하세요 (기본값 : black)
+ * @default black
  * 
- * 이름 입력 창 상단에 도움말 메시지를 작성할 수 있습니다.
- * "KNE 텍스트 이름을 입력해주세요" 등과 같이 사용할 수 있습니다.
+ * @arg textColor
+ * @text 텍스트 색상
+ * @text Text Color
+ * @type string
+ * @desc 텍스트 색상을 변경할 수 있습니다 (기본값 : white)
+ * @default white
  * 
- * OpenXNameInput leader 9
+ * @arg fontSize
+ * @text 폰트 크기
+ * @type number
+ * @desc 폰트의 크기를 설정하세요 (기본값 : 28)
+ * @default 28
+ * @min 0
  * 
- * 이름을 9자 이상으로 입력하려면 위와 같이 플러그인 명령을 직접 호출해주십시오.
- *
- * ============================================================================
- * 변경 사항
- * ============================================================================
- * 2015.10.19 (v1.0.0) - 최초 작성일
- * 2015.12.10 (v1.1.0) - 버그 픽스(화면 축소 버그 수정)
- * 2016.02.15 (v1.2.0) - 플러그인 매개변수 및 플러그인 커맨드 추가
- * 2016.03.22 (v1.3.0) - 플러그인 커맨드에서 문자열을 길게 쓸 수 있게 되었으며 백스페이스 버그를 수정했습니다.
- * 2016.04.05 (v1.4.0) - 한글 입력 시, 두 글자 이상을 꼭 입력해야 하는 버그가 수정되었습니다.
- * 2016.06.18 (v1.5.0) - 상속 구조 변경, 파라미터 기본 값 수정, 폰트 변경 기능 추가, 시스템 언어에 따라 글자 폭 자동 감지 기능 추가
- * 2016.12.20 (v1.6.2) : Default CharWidth 라는 플러그인 매개변수를 추가했습니다.
- * 안드로이드에서 crosswalk-10.39.235.16를 사용하여 빌드했을 때 폭이 제대로 계산되지 않는 버그가 있습니다.
- * (시스템 언어가 항상 'en-US'로 고정되는 라이브러리 상의 버그가 있었습니다)
- * 2017.01.13 (v1.6.3) - android cordova에서 onchange 이벤트를 실행 한 후 상태 표시 줄이 사라지지 않는 버그를 수정했습니다.
- * 2017.06.07 (v1.6.4) :
- * - 이제 배경 이미지를 따로 설정할 수 있습니다.
- * - 취소 버튼을 눌렀을 때 간헐적으로 편집이 되지 않는 문제를 수정했습니다.
- * - 이제 수정 버튼을 누르지 않으면 포커스를 얻을 수 없습니다.
- * 2017.09.15 (v1.6.5) :
- * - 이름 입력 시작 시 기본 이름을 미리 설정하는 기능이 추가되었습니다.
- * 2018.10.26 (v1.6.6) :
- * - 오류 메시지를 띄우는 창을 추가했습니다.
- * - 매개변수 명을 한국어로 변경하였습니다.
- * 2018.11.08 (v1.6.7) :
- * - 같은 이름으로 설정할 수 있게 변경하였습니다.
- * - 수정, 확인, 취소 칸은 모바일 디바이스에서만 뜨게 변경하였습니다.
- * - 에디트 윈도우의 좌표를 모든 해상도에 대응할 수 있게 상대 좌표로 수정하였습니다.
- * 2019.05.30 (v1.6.8) :
- * - 이름을 9자 이상으로 입력할 수 있는 기능이 추가되었습니다.
- * 2019.11.23 (v1.6.9) :
- * - 입력 에디터를 화면에 표시하거나 숨길 수 있는 매개변수를 추가했습니다.
- * - 얼굴 이미지를 감출 수 있는 기능을 추가하였습니다.
- * 2020.07.14 (v1.6.10) :
- * - Fixed the issue, https://github.com/biud436/MV/issues/18
+ * @arg opacity
+ * @text 투명도
+ * @type number
+ * @desc 투명도를 설정하세요 (기본값 : 225)
+ * @default 225
+ * @min 0
+ * @max 255
+ * 
+ * @arg askText
+ * @text 안내 텍스트
+ * @type string
+ * @desc 안내 텍스트를 설정하세요
+ * @default Please enter the name
+ * 
+ * @command OpenXNameInput
+ * @text 이름 8자 이상 입력 받기
+ * @desc 8자 이상의 이름을 설정하고자 할 때 사용하는 플러그인 명령입니다.
+ * 
+ * @arg actorId
+ * @type number
+ * @desc -1로 설정하면 자동으로 리더 파티원으로 설정됩니다.
+ * @default -1
+ * @min -1
+ * @max 4000
+ * 
+ * @arg digits
+ * @type number
+ * @desc 이름의 길이를 입력하세요 (기본값 : 6)
+ * @default 6
+ * @min 6
+ * 
  */
 /*~struct~TextBox:ko
  * 
@@ -514,722 +549,770 @@ Imported.Window_KorNameEdit = true;
 var RS = RS || {};
 RS.Window_KorNameEdit = RS.Window_KorNameEdit || {};
 
-(function($) {
+(($) => {
 
-  "use strict";
-  
-  $.Params = RS.Window_KorNameEdit.Params || {};
-  
-  // private class
-  function TextBox() {
-    this.initialize.apply(this, arguments);
-  };
-  
-  //===========================================================================
-  // Private Members
-  //===========================================================================
-  
-  var parameters = $plugins.filter(function (i) {
-    return i.description.contains('<RS_Window_KorNameEdit>');
-  });
-  
-  parameters = (parameters.length > 0) && parameters[0].parameters;
-  
-  $.Params.windowWidth = parameters['windowWidth'];
-  $.Params.windowCenter = String(parameters['windowCenter'] || 'false');
-  $.Params.outlineWidth = Number(parameters['outlineWidth'] || 1);
-  $.Params.outlineColor = String(parameters['outlineColor'] || 'black');
-  $.Params.fontColor = String(parameters['fontColor'] || 'white');
-  $.Params.opacity = Number(parameters['editWindow_Opacity'] || 225);
-  $.Params.askText = String(parameters['askingText'] || 'Please enter the name');
-  $.Params.standardFontSize = Number(parameters['standardFontSize'] || 28);
-  $.Params.fonts = {
-    'ChineseFonts': parameters['Chinese Fonts'] || 'SimHei, Heiti TC, sans-serif',
-    'KoreanFonts': parameters['Korean Fonts'] || 'Dotum, AppleGothic, sans-serif',
-    'DefaultFonts': parameters['Default Fonts'] || 'GameFont',
-  };
-  $.Params.defaultCharWidth = parameters['Default CharWidth'] || 'A';
-  $.Params.defaultBackground = parameters["Default Background"] || 'auto';
-  
-  $.Params.defaultEditButtonName = parameters["Default Edit Button"] || 'Edit';
-  $.Params.defaultOKButtonName = parameters["Default OK Button"] || 'OK';
-  $.Params.defaultCancelButtonName = parameters["Default Cancel Button"] || 'Cancel';
-  
-  $.Params.didnt_type_anytext = parameters["didnt_type_anytext"] || "아무 글자도 입력하지 않았습니다";
-  $.Params.cant_type_same_name = parameters["cant_type_same_name"] || "같은 이름으로 설정할 수 없습니다.";
+    "use strict";
 
-  $.Params.isKeyboardEditorHidden = Boolean(parameters["Keyboard Editor Hidden"] === "true");
+    $.Params = RS.Window_KorNameEdit.Params || {};
 
-  $.Params.helpWindowOpacity = Number(parameters['helpWindow_Opacity'] || 225);
-  $.Params.isValidErrorMessage = Boolean(parameters["Show Error Message"] === "true");
-  
-  var original_Input_shouldPreventDefault = Input._shouldPreventDefault;
-  var dialog_Input_shouldPreventDefault = function(keyCode) {
-    switch (keyCode) {
-      case 33:    // pageup
-      case 34:    // pagedown
-      case 37:    // left arrow
-      case 38:    // up arrow
-      case 39:    // right arrow
-      case 40:    // down arrow
-      return true;
-    }
-    return false;
-  };
-
-  $.jsonParse = function (str) {
-    var retData = JSON.parse(str, function (k, v) {
-      try { return $.jsonParse(v); } catch (e) { return v; }
+    const pluginParams = $plugins.filter(i => {
+        return i.description.contains('<RS_Window_KorNameEdit>');
     });
-    return retData;
-  };  
-  
-  $.Params.style = $.jsonParse(parameters["Style"]);
 
-  $.Params.isValidFace = Boolean(parameters["Show Face"] === "true");
-  
-  //===========================================================================
-  // TextBox Class
-  //===========================================================================
-  
-  TextBox.BACK_SPACE = 8;
-  TextBox.ENTER = 13;
-  TextBox.IS_NOT_CHAR = 32;
-  TextBox.KEYS_ARRAY = 255;
-  
-  TextBox.prototype.initialize = function(_editWindow)  {
-    this._editWindow = _editWindow;
-    this.createTextBox();
-    this.startToConvertInput();
-    this.blur();
-  };
+    const pluginName = (pluginParams.length > 0) && pluginParams[0].name;
+    const parameters = (pluginParams.length > 0) && pluginParams[0].parameters;
 
-  TextBox.prototype.isKeyboardEditorHidden = function() {
-    // Some devices in Android platform have an issue that is not showing the keyboard editor.
-    // There is no way that detects the model name in the default WebView. 
-    // In the Android Studio, you should detect the device model, like as belows.
-    // See https://developer.android.com/reference/android/os/Build
-    //
-    // import android.os.Build;
-    // 
-    // Build.MODEL.contains("MODEL_NAME");
-    // Build.MODEL.contains("Emulator");
-    //
-    // as the result, you must change the visibility of input form manually.
-    var isMobileDevice = Utils.isMobileDevice();
-    return $.Params.isKeyboardEditorHidden && !isMobileDevice;
-  };
-  
-  TextBox.prototype.createTextBox = function() {
-    this._textBox = document.createElement('input');
-    this._textBox.type = "text";
-    this._textBox.id = "textBox";
-
-    // Get z-index of the game canvas.
-    var canvasIndex = Number(Graphics._canvas.style.zIndex);
-
-    this._textBox.style.zIndex = this.isKeyboardEditorHidden() ? -1 : (canvasIndex + 2);
-    
-    this._textBox.style.position = 'absolute';
-    this._textBox.style.top = 0;
-    this._textBox.style.left = 0;
-    this._textBox.style.right = 0;
-    this._textBox.style.bottom = 0;
-    
-    // 자동 완성 off
-    var chrome_versions_ = navigator.userAgent.split(/(?:Chrome\/)(.{2})/);
-    if(chrome_versions_ && chrome_versions_[1] >= '69') {
-      this._textBox.autocomplete = "off";
-    }
-    
-    if(this.isKeyboardEditorHidden()) {
-      if(Utils.isMobileDevice()) {
-        this._textBox.style.background = "transparent";
-        this._textBox.style.color = "none";
-        this._textBox.style.border = "none";
-        this._textBox.style.outline = "none";
-      } else {
-        this._textBox.style.opacity = 0;
-      }
-      this._textBox.style.width = "0.1px";
-      this._textBox.style.height = "0.1px";
-      this._textBox.style.overflow = "hidden";
-      this._textBox.style.opacity = 0;
-    } else {
-      this._textBox.style.width = $.Params.width || "60%";
-      this._textBox.style.textIndent = $.Params.textIndent || "10px";
-      this._textBox.style.fontSize = $.Params.fontSize || "16px";
-      this._textBox.style.lineHeight = $.Params.lineHeight || "120%";
-      this._textBox.style.border = $.Params.border || "3px solid #bd7419";
-      this._textBox.style.cursor = $.Params.cursor || "text";
-
-      this._textBox.style.top = $.Params.top || "";
-      this._textBox.style.left = $.Params.left || "";      
-      this._textBox.style.right = $.Params.right || 0;
-      this._textBox.style.bottom = $.Params.bottom || 0;
-
-    }
-    
-    this._textBox.onkeydown = this.onKeyDown.bind(this);
-    
-    this._alertFunc = function() {};
-    this._okFunc = function() {};
-    this._defaultName = "";
-  
-    document.body.appendChild(this._textBox);
-
-  };
-  
-  TextBox.prototype.startToConvertInput = function () {
-    Input._shouldPreventDefault = dialog_Input_shouldPreventDefault;
-  };
-  
-  TextBox.prototype.startToOriginalInput = function () {
-    Input._shouldPreventDefault = original_Input_shouldPreventDefault;
-  };
-  
-  TextBox.prototype.setEvent = function(func) {
-    this._textBox.onchange = func;
-    this._okFunc = func;
-  };  
-  
-  TextBox.prototype.removeEvent = function() {
-    this._textBox.onchange = null;
-    this._okFunc = null;
-  };
-  
-  TextBox.prototype.setAlertWindow = function(alert_) {
-    this._alertFunc = alert_;
-  };
-  
-  TextBox.prototype.removeElement = function () {
-    this._textBox.style.display = 'none';
-    document.body.removeChild(this._textBox);
-  };
-  
-  TextBox.prototype.terminateTextBox = function() {
-    this.removeEvent();
-    this.removeElement();
-    this.startToOriginalInput();
-  };
-  
-  TextBox.prototype.onKeyDown = function(e) {
-    var keyCode = e.which;
-    
-    // TODO: It may be performance down because recalculating a style and layout.
-    this.getFocus();
-    
-    if (keyCode < TextBox.IS_NOT_CHAR) {
-      if(keyCode === TextBox.BACK_SPACE) {
-        // if(e && e.preventDefault) e.preventDefault();
-      } else if(keyCode === TextBox.ENTER) {
-        if(this.getTextLength() <= 0) {
-          e.preventDefault();
-          this._alertFunc($.Params.didnt_type_anytext);
-        } else if( this._defaultName === this._textBox.value ) {
-          // e.preventDefault();
-          this._alertFunc($.Params.cant_type_same_name);
-          if(this._okFunc) this._okFunc();
-        }
-      }
-    } else if (keyCode < TextBox.KEYS_ARRAY) {
-      //
-    }
-  }
-  
-  TextBox.prototype.getTextLength = function() {
-    return this._textBox.value.length;
-  };
-  
-  TextBox.prototype.getMaxLength = function() {
-    return this._editWindow._maxLength;
-  };
-  
-  TextBox.prototype.backSpace = function() {
-    this._editWindow._name = this._editWindow._name.slice(0, this._textBox.value.length - 1);
-    this._editWindow._index = this._textBox.value.length;
-    this._textBox.value = this._editWindow._name;
-    this._editWindow.refresh();
-  };
-  
-  TextBox.prototype.refreshNameEdit = function()  {
-    this._editWindow._name = this._textBox.value.toString();
-    this._editWindow._index = this._textBox.value.length || 0;
-    this._editWindow.refresh();
-  };
-  
-  TextBox.prototype.update = function() {
-    if(this.getTextLength() <= this._editWindow._maxLength) {
-      this.refreshNameEdit();
-    }
-  };
-  
-  TextBox.prototype.getFocus = function() {
-    this._textBox.focus();
-  };
-  
-  TextBox.prototype.blur = function() {
-    this._textBox.blur();
-  };
-  
-  TextBox.prototype.terminate =  function() {
-    this.terminateTextBox();
-  };
-  
-  TextBox.prototype.setDefaultName = function (name) {
-    this._textBox.value = name || '';
-    this._defaultName = name;
-    this.refreshNameEdit();
-  };
-  
-  //===========================================================================
-  // Window_NameEdit Class
-  //===========================================================================
-  
-  function Window_KorNameEdit() {
-    this.initialize.apply(this, arguments);
-  }
-  
-  Window_KorNameEdit.prototype = Object.create(Window_NameEdit.prototype);
-  Window_KorNameEdit.prototype.constructor = Window_KorNameEdit;
-  
-  Window_KorNameEdit.prototype.initialize = function(actor, maxLength) {
-    Window_NameEdit.prototype.initialize.call(this, actor, maxLength);
-    this.updateWindowWidth();
-  };
-  
-  Window_KorNameEdit.prototype.standardFontFace = function() {
-    if ($gameSystem.isChinese()) {
-      return $.Params.fonts.ChineseFonts;
-    } else if ($gameSystem.isKorean()) {
-      return $.Params.fonts.KoreanFonts;
-    } else {
-      return $.Params.fonts.DefaultFonts;
-    }
-  };
-  
-  Window_KorNameEdit.prototype.charWidth = function () {
-    // TODO: This code has a bug that 'navigator.language' has always returned
-    // 'en-US' due to a bug of crosswalk-10.39.235.16 xwalk library.
-    var text = $.Params.defaultCharWidth;
-    if (navigator.language.match(/^zh/)) { // isChinese
-      text = '\u4E00';
-    } else if (navigator.language.match(/^ko/)) { // isKorean
-      text = '\uAC00';
-    } else if (navigator.language.match(/^ja/)) { // isJapanese
-      text = '\u3042';
-    }
-    return this.textWidth(text);
-  };
-
-  Window_KorNameEdit.prototype.faceWidth = function() {
-    return $.Params.isValidFace ? 144 : 0;
-  };
-
-  Window_KorNameEdit.prototype.left = function() {
-    var nameCenter = (this.contentsWidth() + this.faceWidth()) / 2;
-    var nameWidth = (this._maxLength + 1) * this.charWidth();
-    return Math.min(nameCenter - nameWidth / 2, this.contentsWidth() - nameWidth);
-  };  
-  
-  Window_KorNameEdit.prototype.drawActorFace = function(actor, x, y, width, height) {
-    if($.Params.isValidFace) {
-      this.drawFace(actor.faceName(), actor.faceIndex(), x, y, width, height);
-    }
-    this.changeTextColor(this.hpColor(actor));
-    this.drawText($.Params.askText, this.left(), y + this.fittingHeight(1) / 2, this.width);
-  };
-
-  Window_KorNameEdit.prototype.itemRect = function(index) {
-    return {
-      x: this.left() + index * this.charWidth(),
-      y: this.fittingHeight(1),
-      width: this.charWidth(),
-      height: this.lineHeight()
+    $.Params.windowWidth = parameters['windowWidth'];
+    $.Params.windowCenter = String(parameters['windowCenter'] || 'false');
+    $.Params.outlineWidth = Number(parameters['outlineWidth'] || 1);
+    $.Params.outlineColor = String(parameters['outlineColor'] || 'black');
+    $.Params.textColor = String(parameters['fontColor'] || 'white');
+    $.Params.opacity = Number(parameters['editWindow_Opacity'] || 225);
+    $.Params.askText = String(parameters['askingText'] || 'Please enter the name');
+    $.Params.standardFontSize = Number(parameters['standardFontSize'] || 28);
+    $.Params.fonts = {
+        'ChineseFonts': parameters['Chinese Fonts'] || 'SimHei, Heiti TC, sans-serif',
+        'KoreanFonts': parameters['Korean Fonts'] || 'Dotum, AppleGothic, sans-serif',
+        'DefaultFonts': parameters['Default Fonts'] || 'GameFont',
     };
-  };
+    $.Params.defaultCharWidth = parameters['Default CharWidth'] || 'A';
+    $.Params.defaultBackground = parameters["Default Background"] || 'auto';
 
-  Window_KorNameEdit.prototype.windowWidth = function () {
-    return 580;
-  };
-  
-  Window_KorNameEdit.prototype.updateWindowWidth = function () {
-    var padding = this.padding * 2;
-    var faceWidth = $.Params.isValidFace ? this.faceWidth() : 0;
-    var textWidth = this.textWidth($.Params.askText) + this.textPadding() * 2;
-    if($.Params.windowWidth === 'auto') {
-      this.width = Math.max(Math.min(padding + faceWidth + textWidth, Graphics.boxWidth - padding), 580);
-    } else {
-      this.width = Number($.Params.windowWidth || 580);
-    }
-  };
-  
-  Window_KorNameEdit.prototype.drawChar = function (index) {
-    var rect = this.itemRect(index);
-    this.resetTextColor();
-    this.contents.outlineWidth = $.Params.outlineWidth;
-    this.contents.outlineColor = $.Params.outlineColor;
-    this.contents.fontColor = $.Params.fontColor;
-    this.drawText(this._name[index] || '', rect.x, rect.y)
-  };
-  
-  Window_KorNameEdit.prototype.standardFontSize = function() {
-    return $.Params.standardFontSize;
-  };
-  
-  Window_KorNameEdit.prototype.refresh = function() {
-    this.contents.clear();
-    this.drawActorFace(this._actor, 0, 0);
-    
-    var rect = this.itemRect(Math.max(this._index - 1, 0));
-    
-    for (var i = 0; i < this._maxLength; i++) {
-      this.drawUnderline(i);
-    }
-    for (var j = 0; j < this._name.length; j++) {
-      this.drawChar(j);
-    }
-    
-    if(this._index === 0) {
-      this.setCursorRect(rect.x, rect.y, 1, rect.height);
-    } else {
-      this.setCursorRect(rect.x + (rect.width - 1), rect.y, 1, rect.height);
-    }
-    
-  };
-  
-  //===========================================================================
-  // Window_NameOK
-  //===========================================================================
-  function Window_KorNameInput() {
-    this.initialize.apply(this, arguments);
-  }
-  
-  Window_KorNameInput.prototype = Object.create(Window_Command.prototype);
-  Window_KorNameInput.prototype.constructor = Window_KorNameInput;
-  
-  Window_KorNameInput.prototype.initialize = function(editWindow) {
-    this._editWindow = editWindow;
-    this.clearCommandList();
-    this.makeCommandList();
-    var width = this.windowWidth();
-    var height = this.windowHeight();
-    Window_Selectable.prototype.initialize.call(this, 0, 0, width, height);
-    this.updatePlacement();
-    this.refresh();
-    this.select(0);
-    this.activate();
-  };
-  
-  Window_KorNameInput.prototype.maxCols = function () {
-    return 3;
-  };
-  
-  Window_KorNameInput.prototype.makeCommandList = function() {
-    this.addCommand($.Params.defaultEditButtonName, 'edit');
-    this.addCommand($.Params.defaultOKButtonName, 'ok');
-    this.addCommand($.Params.defaultCancelButtonName, 'cancel');
-  };
-  
-  Window_KorNameInput.prototype.itemTextAlign = function() {
-    return 'center';
-  };
-  
-  Window_KorNameInput.prototype.updatePlacement = function() {
-    var width = 0;
-    for (var i = 0; i < this.maxItems(); i++) {
-      width += this.textWidth(this._list[i].name) + this.textPadding() * 2;
-    }
-    width += this.padding * 2 + this.spacing();
-    this.width = width;
-    this.x = this._editWindow.x + this._editWindow.width - width;
-    this.y = this._editWindow.y + this._editWindow.height + 10;
-  };
-  
-  //===========================================================================
-  // Scene_Name Class
-  //===========================================================================
-  
-  function Scene_KorName() {
-    this.initialize.apply(this, arguments);
-  }
-  
-  Scene_KorName.prototype = Object.create(Scene_Name.prototype);
-  Scene_KorName.prototype.constructor = Scene_KorName;
-  
-  Scene_KorName.prototype.initialize = function() {
-    // 한글 비트맵 폰트 사용을 잠시 중단한다.
-    if(Imported.RS_HangulBitmapText) {
-      $gameTemp.setHangulBitmapText(false);
-    }
-    this._nowTime = Date.now();      
-    Scene_Name.prototype.initialize.call(this);
-  };
-  
-  Scene_KorName.prototype.createBackground = function() {
-    var bitmap = SceneManager.backgroundBitmap();
-    var customBackgroundImageName = $.Params.defaultBackground;
-    this._backgroundSprite = new Sprite();
-    
-    // 배경 설정이 auto면 이전 장면의 스냅샷을 배경 화면으로 사용한다.
-    if(customBackgroundImageName === 'auto') {
-      this._backgroundSprite.bitmap = bitmap;
-    } else {
-      this._backgroundSprite.bitmap = ImageManager.loadPicture(customBackgroundImageName || '');
-    }
-    
-    this.addChild(this._backgroundSprite);
-    
-  };
-  
-  Scene_KorName.prototype.createPlatformFeatures = function() {
-    if(Utils.isMobileDevice()) {
-      this.createCommandWindow();
-    } else {
-      this._textBox.getFocus();
-    }
-  };
-  
-  Scene_KorName.prototype.updatePlatformFeatures = function() {
-    if(Utils.isMobileDevice()) {
-      if(this._commandWindow.active) {
-        this._textBox.blur();
-      } else {
-        this._textBox.getFocus();
-      }
-    } else {
-      this._textBox.getFocus();
-    }
-  };  
-  
-  Scene_KorName.prototype.onInputOkPlatformFeatures = function() {
-    if(Utils.isMobileDevice()) {    
-      
-      // Lose Focus
-      this._editWindow.deactivate();
-      this._textBox.blur();
+    $.Params.defaultEditButtonName = parameters["Default Edit Button"] || 'Edit';
+    $.Params.defaultOKButtonName = parameters["Default OK Button"] || 'OK';
+    $.Params.defaultCancelButtonName = parameters["Default Cancel Button"] || 'Cancel';
 
-      // Select symbol.
-      this._commandWindow.selectSymbol('ok');
-      this._commandWindow.activate();    
-      
-    } else {
+    $.Params.didnt_type_anytext = parameters["didnt_type_anytext"] || "아무 글자도 입력하지 않았습니다";
+    $.Params.cant_type_same_name = parameters["cant_type_same_name"] || "같은 이름으로 설정할 수 없습니다.";
 
-      this._editWindow.deactivate();
-      this._textBox.blur();
+    $.Params.isKeyboardEditorHidden = Boolean(parameters["Keyboard Editor Hidden"] === "true");
 
-      this._actor.setName(this._editWindow.name());
-      this.popScene();
-    }
-  };
-  
-  Scene_KorName.prototype.terminatePlatformFeatures = function() {
-    if(Utils.isMobileDevice()) {  
-    } else {
-      this._textBox.blur();
-    }
-  };    
-  
-  Scene_KorName.prototype.update = function() {
-    this.updatePlatformFeatures();
-    this._textBox.update();
-    this.updateHelpWindow();
-    Scene_MenuBase.prototype.update.call(this);
-  };
-  
-  Scene_KorName.prototype.updateHelpWindow = function() {
-    // 1초가 경과했을 경우, 도움말의 라이프를 1 줄인다.
-    if( Date.now() - this._nowTime >= 1000) {
-      this._helpWindowLife--;
-      if(this._helpWindowLife <= 0) {
-        this._helpWindow.hide();
-      }
-      this._nowTime = Date.now();
-    }
-  };
-  
-  Scene_KorName.prototype.terminate = function() {
-    Scene_MenuBase.prototype.terminate.call(this);
-    this.terminatePlatformFeatures();
-    this._textBox.terminate();
-    // 한글 비트맵 폰트 사용을 재개한다.
-    if(Imported.RS_HangulBitmapText) {
-      $gameTemp.setHangulBitmapText(RS.HangulBitmapText.Params.tempInit);
-    }
-  };
-  
-  Scene_KorName.prototype.create = function () {
-    Scene_MenuBase.prototype.create.call(this);
-    this._actor = $gameActors.actor(this._actorId);
-    this.createEditWindow();
-    this.createTextBox();
-    this.createPlatformFeatures();
-    this.createHelpWindow();
-    this._textBox.setEvent( this.onInputOk.bind(this) );
-    this._textBox.setAlertWindow( this.onAlert.bind(this) );
-  };
-  
-  Scene_KorName.prototype.onAlert = function(text) {
-    if(!$.Params.isValidErrorMessage) return;
-    if(!this._helpWindow) return;
-    this._helpWindow.show();
-    this._helpWindow.setText(text);
-    this._helpWindowLife = 3;    
-  };
-  
-  Scene_KorName.prototype.createHelpWindow = function() {
-    this._helpWindow = new Window_Help(1);
-    this._helpWindow.x = 0;
-    this._helpWindow.y = Graphics.boxHeight - Math.ceil(Graphics.boxHeight / 6) - this._helpWindow.height;
-    this._helpWindow.opacity = $.Params.helpWindowOpacity;
-    this._helpWindowLife = 0;    
-    this._helpWindow.hide();
-    this.addWindow(this._helpWindow);
-  };
-  
-  Scene_KorName.prototype.createEditWindow = function() {
-    this._editWindow = new Window_KorNameEdit(this._actor, this._maxLength);
-    var self = this._editWindow;
-    var width = self.windowWidth();
-    var height = self.windowHeight();    
-    var x = (Graphics.boxWidth - width) / 2;
-    var y = Math.floor(Graphics.boxHeight / 6);
-    this._editWindow.x = x;
-    this._editWindow.y = y;
-    this.addWindow(this._editWindow);
-  };
-  
-  Scene_KorName.prototype.createCommandWindow = function () {
-    this._commandWindow = new Window_KorNameInput(this._editWindow);
-    this._commandWindow.y = this._editWindow.y + this._editWindow.height;
-    this._commandWindow.setHandler('edit', this.commandEdit.bind(this));
-    this._commandWindow.setHandler('ok', this.commandInput.bind(this));
-    this._commandWindow.setHandler('cancel', this.commandCancel.bind(this));
-    this.addWindow(this._commandWindow);
-  };
-  
-  Scene_KorName.prototype.commandEdit = function () {
-    this._commandWindow.deactivate();
-    this._editWindow.activate();
-    this._textBox.getFocus();
-  };
-  
-  /**
-  * specify the name on your actor and then a currently scene ends up
-  * @method commandInput
-  */
-  Scene_KorName.prototype.commandInput = function () {
-    var name = this._editWindow._name;
-    
-    this._editWindow.deactivate();
-    this._textBox.blur();
-    this._actor.setName(this._editWindow.name());
-    this.popScene();
-  };
-  
-  /**
-  * A currently scene ends up
-  * @method commandCancel
-  */
-  Scene_KorName.prototype.commandCancel = function () {
-    this._textBox.blur();
-    this.popScene();
-  };
-  
-  Scene_KorName.prototype.createTextBox =  function() {
-    this._textBox = new TextBox(this._editWindow);
-    this._initialName = "";
-    if(this._actor) { 
-      this._textBox.setDefaultName(this._actor.name());
-      this._initialName = this._actor.name();
-    }
-    if($.Params.windowCenter === "true") {
-      this._editWindow.y = Graphics.boxHeight / 2 - this._editWindow.height / 2;
-    }
-    this._editWindow.opacity = $.Params.opacity;
-  };
-  
-  Scene_KorName.prototype.onInputOk = function() {
-    this.onInputOkPlatformFeatures();
-    
-    Input.clear();
-    
-  };
-  
-  //===========================================================================
-  // Game_Interpreter
-  //===========================================================================
-  
-  // Name Input Processing
-  Game_Interpreter.prototype.command303 = function() {
-    if (!$gameParty.inBattle()) {
-      if ($dataActors[this._params[0]]) {
-        SceneManager.push(Scene_KorName);
-        SceneManager.prepareNextScene(this._params[0], this._params[1]);
-      }
-    }
-    return true;
-  };
-  
-  //===========================================================================
-  // Game_Interpreter
-  //===========================================================================
-  
-  var alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-  Game_Interpreter.prototype.pluginCommand = function(command, args) {
-    alias_Game_Interpreter_pluginCommand.call(this, command, args);
-    if(command === "KNE") {
-      switch(args[0]) {
-        case 'width':
-        case '폭':
-        if(args[1] !== 'auto') {
-          $.Params.windowWidth = Number(args[1] || 580);
-        } else {
-          $.Params.windowWidth = 'auto';
+    $.Params.helpWindowOpacity = Number(parameters['helpWindow_Opacity'] || 225);
+    $.Params.isValidErrorMessage = Boolean(parameters["Show Error Message"] === "true");
+
+    // TODO: 아래 윈도우 폭 값은 하드 코딩되었다. 그러나 장기적으로 플러그인 매개변수로 변경하는 것이 좋다.
+    $.Params.refWindowWidth = 580;
+
+    /**
+     * ! <input> 태그에서 pageup, pagedown, left, right, up, down 키의 동작을 무시하기 위한 함수
+     * ! Keyboard Input Dialog와 달리, Name Input Window에서는 키입력을 무시해야 한다.
+     */
+    const original_Input_shouldPreventDefault = Input._shouldPreventDefault;
+    const dialog_Input_shouldPreventDefault = function (keyCode) {
+        switch (keyCode) {
+            case 33: // pageup
+            case 34: // pagedown
+            case 37: // left arrow
+            case 38: // up arrow
+            case 39: // right arrow
+            case 40: // down arrow
+                return true;
         }
-        break;
-        case 'center':
-        case '중앙정렬':
-        $.Params.windowCenter = String(args[1] || 'false');
-        break;
-        case 'outlineWidth':
-        case '테두리크기':
-        $.Params.outlineWidth = Number(args[1] || 1);
-        break;
-        case 'outlineColor':
-        case '테두리색상':
-        $.Params.outlineColor = String(args[1] || 'black');
-        break;
-        case 'fontColor':
-        case '폰트색상':
-        $.Params.fontColor = String(args[1] || 'white');
-        break;
-        case 'fontSize':
-        case '폰트크기':
-        $.Params.standardFontSize = Number(args[1] || 28);
-        break;
-        case 'opacity':
-        case '투명도':
-        var _opacity = Number(args[1] || 1);
-        $.Params.opacity = _opacity.clamp(0, 255);
-        break;
-        case 'askText':
-        case '텍스트':
-        $.Params.askText = String(args.slice(1).join(""));
-        break;
-      }
-    }
-    if(command === "OpenXNameInput") {
-      if (!$gameParty.inBattle()) {
-        var leaderId = $gameParty.leader().actorId();
-        var actorId = (args[0] === "leader") ? leaderId : (parseInt(args[0]) || leaderId);
-        var digits = parseInt(args[1]) || 6;
-        if ($dataActors[actorId]) {
-          SceneManager.push(Scene_KorName);
-          SceneManager.prepareNextScene(actorId, digits);
+        return false;
+    };
+
+    $.jsonParse = function (str) {
+        const retData = JSON.parse(str, function (k, v) {
+            try {
+                return $.jsonParse(v);
+            } catch (e) {
+                return v;
+            }
+        });
+        return retData;
+    };
+
+    $.Params.style = $.jsonParse(parameters["Style"]);
+
+    $.Params.isValidFace = Boolean(parameters["Show Face"] === "true");
+
+    //===========================================================================
+    // Plugin Commands
+    //===========================================================================
+
+    /**
+     * 플러그인 커맨드를 통해 한 번에 조작이 가능한 플러그인 매개변수를 8개나 만들었지만 ,
+     * 본래는 각 플러그인 매개변수마다 하나의 플러그인 커맨드를 가져야 한다.
+     * 그러나 그렇게 하면 라인을 낭비하기 때문에 하나의 플러그인 커맨드로 처리하였다.
+     */
+    PluginManager.registerCommand(pluginName, "KNE", args => {
+        $.Params.windowWidth = (args.width === "auto") ? "auto" : Number(args.width);
+        $.Params.windowCenter = Boolean(args.center == "true")
+        $.Params.outlineWidth = Number(args.outlineWidth || 1);
+        $.Params.outlineColor = String(args.outlineColor || 'black');
+        $.Params.textColor = String(args.textColor || 'white');
+        $.Params.standardFontSize = Number(args.fontSize || 28);
+        $.Params.opacity = Number(args.opacity || 225);
+        $.Params.askText = String(args.askText);
+    });
+
+    /**
+     * 기본 이름 입력 이벤트 커맨드는 입력 받을 수 있는 이름의 자릿수 제한이 있다.
+     * 자릿수 제한을 해제하기 위해 다음 플러그인 명령을 사용할 수 있다.
+     * 그러나 필수로 사용해야 하는 건 아니다.
+     * 
+     * @example
+     * PluginManager.callCommand($gameMap._interpreter, "RS_Window_KorNameEdit", "OpenXNameInput", {actorId: -1, digits: 6});
+     */
+    PluginManager.registerCommand(pluginName, "OpenXNameInput", args => {
+        let actorId = Number(args.actorId);
+        const leaderId = $gameParty.leader().actorId();
+
+        if (!$gameParty.inBattle()) {
+            if (actorId === -1) actorId = leaderId;
+            const digits = Number(args.digits);
+            if ($dataActors[actorId]) {
+                SceneManager.push(Scene_KorName);
+                SceneManager.prepareNextScene(actorId, digits);
+            }
         }
-      }
-    }       
-  };
-  
+    });    
+
+    /**
+     * MZ에서 ES6을 완벽하게 사용하기에는 제한이 되므로 부분적으로 ES6을 사용하고 있다.
+     * 타입 스크립트 인터페이스가 완성되지 않았기 때문에 상세한 타입 설정 주석문은 생략하였다.
+     * 
+     * @class TextBox
+     */
+    class TextBox {
+
+        constructor(_editWindow) {
+            this._editWindow = _editWindow;
+            this.createTextBox();
+            this.startToConvertInput();
+            this.blur();
+        }
+
+        isKeyboardEditorHidden() {
+            return $.Params.isKeyboardEditorHidden;
+        }
+
+        createTextBox() {
+            this._textBox = document.createElement('input');
+            this._textBox.type = "text";
+            this._textBox.id = "textBox";
+
+            // Get z-index of the game canvas.
+            const canvasIndex = Number(Graphics._canvas.style.zIndex);
+
+            this._textBox.style.zIndex = this.isKeyboardEditorHidden() ? -1 : (canvasIndex + 2);
+
+            this._textBox.style.position = 'absolute';
+            this._textBox.style.top = 0;
+            this._textBox.style.left = 0;
+            this._textBox.style.right = 0;
+            this._textBox.style.bottom = 0;
+
+            // 자동 완성 off
+            const chrome_versions_ = navigator.userAgent.split(/(?:Chrome\/)(.{2})/);
+            if (chrome_versions_ && chrome_versions_[1] >= '69') {
+                this._textBox.autocomplete = "off";
+            }
+
+            if (this.isKeyboardEditorHidden()) {
+                if (Utils.isMobileDevice()) {
+                    this._textBox.style.background = "transparent";
+                    this._textBox.style.color = "none";
+                    this._textBox.style.border = "none";
+                    this._textBox.style.outline = "none";
+                } else {
+                    this._textBox.style.opacity = 0;
+                }
+                this._textBox.style.width = "0.1px";
+                this._textBox.style.height = "0.1px";
+                this._textBox.style.overflow = "hidden";
+                this._textBox.style.opacity = 0;
+            } else {
+                this._textBox.style.width = $.Params.width || "60%";
+                this._textBox.style.textIndent = $.Params.textIndent || "10px";
+                this._textBox.style.fontSize = $.Params.fontSize || "16px";
+                this._textBox.style.lineHeight = $.Params.lineHeight || "120%";
+                this._textBox.style.border = $.Params.border || "3px solid #bd7419";
+                this._textBox.style.cursor = $.Params.cursor || "text";
+
+                this._textBox.style.top = $.Params.top || "";
+                this._textBox.style.left = $.Params.left || "";
+                this._textBox.style.right = $.Params.right || 0;
+                this._textBox.style.bottom = $.Params.bottom || 0;
+
+            }
+
+            this._textBox.onkeydown = this.onKeyDown.bind(this);
+
+            this._alertFunc = function () {};
+            this._okFunc = function () {};
+            this._defaultName = "";
+
+            document.body.appendChild(this._textBox);
+
+        }
+
+        /**
+         * 기본 버튼의 동작을 무시하기 위해 기존 콜백 함수를 변경하여야 한다.
+         * 이렇게 하면 pageup, pagedown, left, right, up, down 키를 조작할 수 없게 된다.
+         */
+        startToConvertInput() {
+            Input._shouldPreventDefault = dialog_Input_shouldPreventDefault;
+        }
+
+        startToOriginalInput() {
+            Input._shouldPreventDefault = original_Input_shouldPreventDefault;
+        }
+
+        setEvent(func) {
+            this._textBox.onchange = func;
+            this._okFunc = func;
+        }
+
+        removeEvent() {
+            this._textBox.onchange = null;
+            this._okFunc = null;
+        }
+
+        setAlertWindow(alert_) {
+            this._alertFunc = alert_;
+        }
+
+        removeElement() {
+            this._textBox.style.display = 'none';
+            document.body.removeChild(this._textBox);
+        }
+
+        terminateTextBox() {
+            this.removeEvent();
+            this.removeElement();
+            this.startToOriginalInput();
+        }
+
+        onKeyDown(e) {
+            const keyCode = e.which;
+
+            this.getFocus();
+
+            if (keyCode < TextBox.IS_NOT_CHAR) {
+                if (keyCode === TextBox.BACK_SPACE) {
+                    // if(e && e.preventDefault) e.preventDefault();
+                } else if (keyCode === TextBox.ENTER) {
+                    if (this.getTextLength() <= 0) {
+                        e.preventDefault();
+                        this._alertFunc($.Params.didnt_type_anytext);
+                    } else if (this._defaultName === this._textBox.value) {
+                        // e.preventDefault();
+                        this._alertFunc($.Params.cant_type_same_name);
+                        if (this._okFunc) this._okFunc();
+                    }
+                }
+            } else if (keyCode < TextBox.KEYS_ARRAY) {
+                //
+            }
+        }
+
+        getTextLength() {
+            return this._textBox.value.length;
+        }
+
+        getMaxLength() {
+            return this._editWindow._maxLength;
+        }
+
+        backSpace() {
+            this._editWindow._name = this._editWindow._name.slice(0, this._textBox.value.length - 1);
+            this._editWindow._index = this._textBox.value.length;
+            this._textBox.value = this._editWindow._name;
+            this._editWindow.refresh();
+        }
+
+        refreshNameEdit() {
+            this._editWindow._name = this._textBox.value.toString();
+            this._editWindow._index = this._textBox.value.length || 0;
+            this._editWindow.refresh();
+        }
+
+        update() {
+            if (this.getTextLength() <= this._editWindow._maxLength) {
+                this.refreshNameEdit();
+            }
+        }
+
+        getFocus() {
+            this._textBox.focus();
+        }
+
+        blur() {
+            this._textBox.blur();
+        }
+
+        terminate() {
+            this.terminateTextBox();
+        }
+
+        setDefaultName(name) {
+            this._textBox.value = name || '';
+            this._defaultName = name;
+            this.refreshNameEdit();
+        }
+    }
+
+    TextBox.BACK_SPACE = 8;
+    TextBox.ENTER = 13;
+    TextBox.IS_NOT_CHAR = 32;
+    TextBox.KEYS_ARRAY = 255;
+
+    window.TextBox = TextBox;
+
+    //===========================================================================
+    // Window_KorNameEdit
+    //===========================================================================
+
+    class Window_KorNameEdit extends Window_NameEdit {
+        constructor(rect) {
+            super(rect);
+            this.updateWindowWidth();
+        }
+
+        faceWidth() {
+            return $.Params.isValidFace ? ImageManager.faceWidth : 0;
+        }
+
+        /**
+         * MZ에서 Deprecated된 메서드이지만 다시 복구하였다.
+         */
+        getStandardFontFace() {
+            if ($gameSystem.isChinese()) {
+                return $.Params.fonts.ChineseFonts;
+            } else if ($gameSystem.isKorean()) {
+                return $.Params.fonts.KoreanFonts;
+            } else {
+                return $.Params.fonts.DefaultFonts;
+            }
+        }
+
+        /**
+         * MZ에서 deprecated된 메서드이지만 호환성을 위해 복구하였다.
+         */        
+        textPadding() {
+            return 6;
+        }
+
+        /**
+         * 이름 편집 윈도우의 가로 크기는 처음에 고정된 값이 주어진다.
+         * 자동으로 설정된 경우에는 안내 텍스트의 크기에 맞게 동적으로 변경한다.
+         */
+        updateWindowWidth() {
+            const padding = this.padding * 2;
+            const faceWidth = $.Params.isValidFace ? this.faceWidth() : 0;
+            const textWidth = this.textWidth($.Params.askText) + this.textPadding() * 2;
+            if ($.Params.windowWidth === 'auto') {
+                this.width = Math.max(Math.min(padding + faceWidth + textWidth, Graphics.boxWidth - padding), 580);
+            } else {
+                this.width = Number($.Params.windowWidth || $.Params.refWindowWidth);
+            }
+        };
+
+        /**
+         * 텍스트를 묘화하기 전에 폰트 재설정하는 역할을 한다.
+         */
+        resetFontSettings() {
+            super.resetFontSettings();
+            this.contents.fontFace = this.getStandardFontFace();
+            this.contents.textColor = $.Params.textColor;
+            this.contents.outlineColor = $.Params.outlineColor;
+            this.contents.outlineWidth = $.Params.outlineWidth;
+            this.contents.fontSize = $.Params.standardFontSize;
+        }
+
+        /**
+         * 일본어의 경우, 반각이나 전각 등 글자의 크기가 절반이 되는 경우가 있지만
+         * 한자나 한글의 경우 그런 경우가 없다.
+         */
+        charWidth() {
+            let text = $.Params.defaultCharWidth;
+            if (navigator.language.match(/^zh/)) { // 중국어
+                text = '\u4E00';
+            } else if (navigator.language.match(/^ko/)) { // 한국어
+                text = '\uAC00';
+            } else if (navigator.language.match(/^ja/)) { // 일본어
+                text = '\u3042';
+            }
+            return this.textWidth(text);
+        }
+
+        left() {
+            const nameCenter = (this.innerWidth + this.faceWidth()) / 2;
+            const nameWidth = (this._maxLength + 1) * this.charWidth();
+            return Math.min(nameCenter - nameWidth / 2, this.innerWidth - nameWidth);
+        }
+
+        itemRect(index) {
+            const x = this.left() + index * this.charWidth();
+            const y = this.fittingHeight(1);
+            const width = this.charWidth();
+            const height = this.lineHeight();
+            return new Rectangle(x, y, width, height);
+        }
+
+        drawActorFace(actor, x, y, width, height) {
+            if ($.Params.isValidFace) {
+                this.drawFace(actor.faceName(), actor.faceIndex(), x, y, width, height);
+            }
+            this.changeTextColor(ColorManager.hpColor(actor));
+            this.drawText($.Params.askText, this.left(), y + this.fittingHeight(1) / 2, this.width);
+        }
+
+        refresh() {
+            this.contents.clear();
+            this.resetFontSettings();
+            this.drawActorFace(this._actor, 0, 0);
+
+            const rect = this.itemRect(Math.max(this._index - 1, 0));
+
+            // 문자 하단의 밑줄을 그린다.
+            for (let i = 0; i < this._maxLength; i++) {
+                this.drawUnderline(i);
+            }
+
+            // 반복문을 통해 모든 문자를 제위치에 묘화한다.
+            for (let j = 0; j < this._name.length; j++) {
+                this.drawChar(j);
+            }
+
+            // 커서의 위치를 설정한다.
+            if (this._index === 0) {
+                this.setCursorRect(rect.x, rect.y, 1, rect.height);
+            } else {
+                this.setCursorRect(rect.x + (rect.width - 1), rect.y, 1, rect.height);
+            }
+        }
+    }
+
+    //===========================================================================
+    // Window_KorNameInput
+    //===========================================================================
+    class Window_KorNameInput extends Window_Command {
+
+        constructor(rect) {
+            super(rect);
+            this.clearCommandList();
+            this.makeCommandList();
+            this.updatePlacement();
+            this.refresh();
+            this.select(0);
+            this.activate();
+        }
+
+        setEditWindow(editWindow) {
+            this._editWindow = editWindow;
+        }
+
+        spacing() {
+            return 12;
+        }
+
+        makeCommandList() {
+            this.addCommand($.Params.defaultEditButtonName, 'edit');
+            this.addCommand($.Params.defaultOKButtonName, 'ok');
+            this.addCommand($.Params.defaultCancelButtonName, 'cancel');
+        }
+
+        textPadding() {
+            return 6;
+        }
+
+        updatePlacement() {
+            if (!this._editWindow) {
+                return;
+            }
+
+            let width = 0;
+
+            for (let i = 0; i < this.maxItems(); i++) {
+                width += this.textWidth(this._list[i].name) + this.textPadding() * 2;
+            }
+
+            width += this.padding * 2 + this.spacing();
+
+            this.width = width;
+            this.x = this._editWindow.x + this._editWindow.width - width;
+            this.y = this._editWindow.y + this._editWindow.height + 10;
+        };
+
+        maxCols() {
+            return 3;
+        }
+    }
+
+    //===========================================================================
+    // Scene_Name Class
+    //===========================================================================
+
+    class Scene_KorName extends Scene_Name {
+
+        constructor() {
+            super();
+            this.initWithDeltaTime();
+        }
+
+        initWithDeltaTime() {
+            this._nowTime = Date.now();
+        }
+
+        createBackground() {
+            const bitmap = SceneManager.backgroundBitmap();
+            const customBackgroundImageName = $.Params.defaultBackground;
+
+            this._backgroundSprite = new Sprite();
+
+            // 배경 설정이 auto면 이전 장면의 스냅샷을 배경 화면으로 사용한다.
+            if (customBackgroundImageName === 'auto') {
+                this._backgroundSprite.bitmap = bitmap;
+            } else {
+                this._backgroundSprite.bitmap = ImageManager.loadPicture(customBackgroundImageName || '');
+            }
+
+            this.addChild(this._backgroundSprite);
+
+        }
+
+        createCancelButton() {
+            
+        }
+
+        needsCancelButton() {
+            return false;
+        };        
+
+        createPlatformFeatures() {
+            if (Utils.isMobileDevice()) {
+                this.createCommandWindow();
+            } else {
+                this._textBox.getFocus();
+            }
+        }
+
+        updatePlatformFeatures() {
+            if (Utils.isMobileDevice()) {
+                if (this._commandWindow.active) {
+                    this._textBox.blur();
+                } else {
+                    this._textBox.getFocus();
+                }
+            } else {
+                this._textBox.getFocus();
+            }
+        }
+
+        onInputOkPlatformFeatures() {
+            if (Utils.isMobileDevice()) {
+
+                // Lose Focus
+                this._editWindow.deactivate();
+                this._textBox.blur();
+
+                // Select symbol.
+                this._commandWindow.selectSymbol('ok');
+                this._commandWindow.activate();
+
+            } else {
+
+                this._editWindow.deactivate();
+                this._textBox.blur();
+
+                this._actor.setName(this._editWindow.name());
+                this.popScene();
+            }
+        }
+
+        terminatePlatformFeatures() {
+            if (Utils.isMobileDevice()) {} else {
+                this._textBox.blur();
+            }
+        }
+
+        update() {
+            this.updatePlatformFeatures();
+            this._textBox.update();
+            this.updateHelpWindow();
+
+            super.update();
+        }
+
+        updateHelpWindow() {
+            // 1초가 경과했을 경우, 도움말의 라이프를 1 줄인다.
+            if (Date.now() - this._nowTime >= 1000) {
+                this._helpWindowLife--;
+                if (this._helpWindowLife <= 0) {
+                    this._helpWindow.hide();
+                }
+                this._nowTime = Date.now();
+            }
+        }
+
+        terminate() {
+            super.terminate();
+
+            this.terminatePlatformFeatures();
+            this._textBox.terminate();
+        }
+
+        create() {
+            super.create();
+
+            this._actor = $gameActors.actor(this._actorId);
+            this.createEditWindow();
+            this.createTextBox();
+            this.createPlatformFeatures();
+            this.createHelpWindow();
+            this._textBox.setEvent(this.onInputOk.bind(this));
+            this._textBox.setAlertWindow(this.onAlert.bind(this));
+        }
+
+        onAlert(text) {
+            if (!$.Params.isValidErrorMessage) return;
+            if (!this._helpWindow) return;
+            this._helpWindow.show();
+            this._helpWindow.setText(text);
+            this._helpWindowLife = 3;
+        }
+
+        createHelpWindow() {
+            let rect = this.helpWindowRect();
+            rect.x = 0;
+            rect.y = Graphics.boxHeight - Math.ceil(Graphics.boxHeight / 6) - this.helpAreaHeight();
+            rect.height = this.calcWindowHeight(1, false);
+            this._helpWindow = new Window_Help(rect);
+            this._helpWindow.opacity = $.Params.helpWindowOpacity;
+            this._helpWindowLife = 0;
+            this._helpWindow.hide();
+            this.addWindow(this._helpWindow);
+        }
+
+        createEditWindowRect() {
+            const ww = $.Params.refWindowWidth;
+            const wh = this.calcWindowHeight(4, false);
+            const wx = (Graphics.boxWidth - ww) / 2;
+            let wy = 0;
+
+            if ($.Params.windowCenter) {
+                wy = Graphics.boxHeight / 2 - wh / 2;
+            } else {
+                wy = this.mainAreaTop() + Math.floor(Graphics.boxHeight / 6);
+            }
+
+            return new Rectangle(wx, wy, ww, wh);
+        }
+
+        isBottomHelpMode() {
+            return false;
+        }
+
+        createCommandWindowRect() {
+            const gw = Graphics.boxWidth;
+            const gh = Graphics.boxHeight;
+            const w = this.mainCommandWidth();
+            const h = this.calcWindowHeight(1, true);
+
+            if (!this._editWindow) {
+                return new Rectangle(
+                    gw / 2 - w / 2,
+                    gh / 2 - h / 2,
+                    w,
+                    h
+                );
+            }
+
+            return new Rectangle(
+                this._editWindow.x,
+                this._editWindow.y + this._editWindow.height + 8,
+                this._editWindow.width - w,
+                h
+            );
+        }
+
+        createEditWindow() {
+            const rect = this.createEditWindowRect();
+            this._editWindow = new Window_KorNameEdit(rect);
+            this._editWindow.setup(this._actor, this._maxLength);
+            this.addWindow(this._editWindow);
+        }
+
+        createInputWindow() {
+
+        }
+
+        inputWindowRect() {
+
+        }
+
+        createCommandWindow() {
+            const rect = this.createCommandWindowRect();
+            this._commandWindow = new Window_KorNameInput(rect);
+            this._commandWindow.setEditWindow(this._editWindow);
+
+            this._commandWindow.y = this._editWindow.y + this._editWindow.height;
+            this._commandWindow.setHandler('edit', this.commandEdit.bind(this));
+            this._commandWindow.setHandler('ok', this.commandInput.bind(this));
+            this._commandWindow.setHandler('cancel', this.commandCancel.bind(this));
+            this.addWindow(this._commandWindow);
+        }
+
+        commandEdit() {
+            this._commandWindow.deactivate();
+            this._editWindow.activate();
+            this._textBox.getFocus();
+        }
+
+        /**
+         * specify the name on your actor and then a currently scene ends up
+         * @method commandInput
+         */
+        commandInput() {
+            this._editWindow.deactivate();
+            this._textBox.blur();
+            this._actor.setName(this._editWindow.name());
+            this.popScene();
+        }
+
+        /**
+         * A currently scene ends up
+         * @method commandCancel
+         */
+        commandCancel() {
+            this._textBox.blur();
+            this.popScene();
+        }
+
+        createTextBox() {
+            this._textBox = new TextBox(this._editWindow);
+            this._initialName = "";
+            if (this._actor) {
+                this._textBox.setDefaultName(this._actor.name());
+                this._initialName = this._actor.name();
+            }
+            this._editWindow.opacity = $.Params.opacity;
+        }
+
+        onInputOk() {
+            this.onInputOkPlatformFeatures();
+
+            Input.clear();
+
+        }
+
+    }
+
+    //===========================================================================
+    // Game_Interpreter
+    //===========================================================================
+
+    // Name Input Processing
+    Game_Interpreter.prototype.command303 = function (params) {
+        if (!$gameParty.inBattle()) {
+            if ($dataActors[params[0]]) {
+                SceneManager.push(Scene_KorName);
+                SceneManager.prepareNextScene(params[0], params[1]);
+            }
+        }
+        return true;
+    };
+
 })(RS.Window_KorNameEdit);

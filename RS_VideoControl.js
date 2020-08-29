@@ -64,6 +64,8 @@
  * 2016.10.21 (v1.0.1) - Fixed some funtions (RMMV 1.3.2)
  * 2017.06.10 (v1.0.2) - Fixed the plugin command and the code for RMMV 1.5.0
  * 2019.02.28 (v1.0.3) - Added some plugin commands.
+ * 2020.08.10 (v1.0.4) :
+ * - added Graphics.stopVideo();
  */
 /*:ko
  * @plugindesc 이 플러그인은 기본 동영상 재생 시 컨트롤 바를 같이 띄웁니다.
@@ -123,6 +125,8 @@
  * 2016.10.21 (v1.0.1) - Fixed some funtions (RMMV 1.3.2)
  * 2017.06.10 (v1.0.2) - Fixed the plugin command and the code for RMMV 1.5.0
  * 2019.02.28 (v1.0.3) - Added some plugin commands.
+ * 2020.08.10 (v1.0.4) :
+ * - added Graphics.stopVideo();
  */
 
 var Imported = Imported || {};
@@ -167,6 +171,12 @@ RS.VideoControl = RS.VideoControl || {};
     }
     return 0.0;
   };
+
+  Graphics.stopVideo = function() {
+    this._video.pause();
+    this._video.currentTime = 0;
+    this._videoLoading = false;
+  }
 
   var alias_Graphics_updateVideo = Graphics._updateVideo;
   Graphics._updateVideo = function() {

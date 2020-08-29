@@ -7,20 +7,16 @@
 // Free for commercial and non commercial use.
 //================================================================
 /*:
- * @plugindesc <RS_ArabicNameEdit>
+ * @target MZ
+ * @plugindesc This plugin allows you to type the name in Arabic <RS_ArabicNameEdit>
  * @author biud436
  * 
  * @param Font
  * @desc Specify the font face as you want.
- * @default GameFont
+ * @default Simplified Arabic, Times New Roman, Segoe UI, rmmz-mainfont
  *    
  * @help
- * ================================================================
- * Change Log
- * ================================================================
- * 2020.01.31 (v1.0.0) - First Release.
- * 2020.01.31 (v1.0.1) :
- * - Reviewed the Arabic letters, by Koro San.
+ * 2020.08.23 (v1.0.0) - First Release.
  */
 
 var Imported = Imported || {};
@@ -29,45 +25,49 @@ Imported.RS_ArabicNameEdit = true;
 var RS = RS || {};
 RS.ArabicNameEdit = RS.ArabicNameEdit || {};
 
-(function($) {
-    
+($ => {
+
     "use strict";
 
-    var parameters = $plugins.filter(function (i) {
+    const pluginParams = $plugins.filter(function (i) {
       return i.description.contains('<RS_ArabicNameEdit>');
     });
     
-    parameters = (parameters.length > 0) && parameters[0].parameters;
-
-    $.jsonParse = function (str) {
-        var retData = JSON.parse(str, function (k, v) {
-          try { return $.jsonParse(v); } catch (e) { return v; }
-        });
-        return retData;
-    };
+    const pluginName = (pluginParams.length > 0) && pluginParams[0].name;
+    const parameters = (pluginParams.length > 0) && pluginParams[0].parameters;
 
     $.Params = {};
-    $.Params.fontFace = parameters["Font"] || "GameFont";
+    $.Params.fontFace = parameters["Font"];
 
     class Window_ArabicNameEdit extends Window_NameEdit {
 
-        constructor(actor, maxLength) {
-            super(actor, maxLength);
+        constructor(rect) {
+            super(rect);
+        }
+
+        setup(actor, maxLength) {
+            super.setup(actor, maxLength);
         }
 
         createActorFace() {
             this._actorSprite = new Sprite();
             this._actorSprite.visible = false;
             
-            this._windowContentsSprite.addChild(this._actorSprite);
+            this._clientArea.addChild(this._actorSprite);
         }
 
         standardFontFace() {
-            if(!navigator.language.match(/^ar/)) {
-                return super.standardFontFace();
-            }
-
             return $.Params.fontFace;
+        }
+
+        resetFontSettings() {
+            this.contents.fontFace = this.standardFontFace();
+            this.contents.fontSize = $gameSystem.mainFontSize();
+            this.resetTextColor();
+        }        
+
+        textPadding() {
+            return 0;
         }
 
         /**
@@ -75,20 +75,28 @@ RS.ArabicNameEdit = RS.ArabicNameEdit || {};
          */
         right(textWidth) {
             let padding = this.textPadding();
-            let width = this.contents.width - padding;
+            let width = this.innerWidth - padding;
 
-            let faceWidth = Window_Base._faceWidth;
+            let faceWidth = ImageManager.faceWidth;
 
             if(this._actor.faceName() !== "") {
                 width -= faceWidth;
             }
+
+            width -= textWidth;
 
             return width;
 
         }
 
         itemRect2(textWidth) {
-            return new Rectangle( this.right(textWidth), 54, 42, this.lineHeight());
+            return new Rectangle
+            ( 
+                this.right(textWidth), 
+                54, 
+                42,
+                this.lineHeight()
+            );
         }
 
         makeText(text) { 
@@ -117,9 +125,14 @@ RS.ArabicNameEdit = RS.ArabicNameEdit || {};
             this.contents.paintOpacity = 255;
         }
 
+        /**
+         * Draw the arabic text in name edit window
+         * @param {Rectangle} rect 
+         * @param {String} text 
+         */
         drawArabicText(rect, text) {
-            this.resetTextColor();            
-            this.drawText(text, rect.x, rect.y);    
+            this.resetTextColor();  
+            this.drawText(text, rect.x, rect.y);
         }
 
         /**
@@ -135,8 +148,8 @@ RS.ArabicNameEdit = RS.ArabicNameEdit || {};
             }
 
             const faceIndex = this._actor.faceIndex();
-            const w = Window_Base._faceWidth;
-            const h = Window_Base._faceHeight;
+            const w = ImageManager.faceWidth;
+            const h = ImageManager.faceHeight;
             const cols = 4;
 
             this._actorSprite.bitmap = ImageManager.loadFace(faceName);
@@ -154,22 +167,41 @@ RS.ArabicNameEdit = RS.ArabicNameEdit || {};
         }
 
         refresh() {
+
+            const faceWidth = this._actor.faceName() ? ImageManager.faceWidth : 0;
+
             this.contents.clear();
 
-            // Make an arabic text
-            var text = this.makeText(this._name || '');
-            var textWidth = this.textWidth(text);
+            let rect = 
+                new Rectangle
+                    (
+                        this.innerWidth - faceWidth - this.itemPadding(),
+                        this.itemPadding(),
+                        this.innerWidth,
+                        this.innerHeight
+                    );
 
-            var rect = this.itemRect2(textWidth);
-            
             if(!this._actorSprite) {
                 this.createActorFace();                
             }
 
             this.drawActorFace2(rect);
-            rect.x -= Math.round(textWidth);
-            this.drawUnderline2(rect, textWidth);
+            const text = this.makeText(this._name || '');
+            const textWidth = this.textWidth(text);                          
+
+            rect = this.itemRect2(textWidth);
+
+            const width = this.textWidth(text);
+            const px = this.right(width);            
+            const py = this.innerHeight / 2 - rect.height / 2;
+
+            rect.x = px;
+            rect.y = py;
+            rect.x -= faceWidth;
+
+            this.drawUnderline2(rect, textWidth);      
             this.drawArabicText(rect, text);
+            this.setCursorRect(rect.x, rect.y, width, rect.height);
         
         }
     }
@@ -202,12 +234,18 @@ RS.ArabicNameEdit = RS.ArabicNameEdit || {};
    
     class Window_ArabicNameInput extends Window_NameInput {
 
-        standardFontFace() {
-            if(!navigator.language.match(/^ar/)) {
-                return super.standardFontFace();
-            }
+        constructor(rect) {
+            super(rect);
+        }
 
+        standardFontFace() {
             return $.Params.fontFace;
+        }
+
+        resetFontSettings() {
+            this.contents.fontFace = this.standardFontFace();
+            this.contents.fontSize = $gameSystem.mainFontSize();
+            this.resetTextColor();
         }
 
         table() {
