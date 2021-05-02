@@ -87,9 +87,57 @@
  * 
  * @help
  * This plugin is RS_InputDialog for MZ version.
- * However, it is not done yet.
  * 
- * I will be going to change an <input> element's CSS.
+ * =============================================================================
+ * Change Log
+ * =============================================================================
+ * 2016.08.09 (v1.0.0) - First Release.
+ * 2016.08.09 (v1.0.1) - Added Background Color.
+ * 2016.08.10 (v1.0.1a) - Added ID Variables.
+ * 2016.08.10 (v1.1.0) - Fixed Window_DialogHelp class into the plugin.
+ * 2016.08.16 (v1.1.1) - Added the direction property setting the direction of content flow.
+ * 2016.08.16 (v1.1.1a) - Fixed a whitespace bug.
+ * 2016.10.14 (v1.1.2) - Fixed the issue that is not working in Battle.
+ * 2016.10.14 (v1.1.3) :
+ * - Fixed the bug that does not change the background color.
+ * - Fixed the bug that does not change the variable ID.
+ * 2016.10.17 (v1.1.4) - Fixed the frame works of input dialog in battle.
+ * 2016.10.18 (v1.1.5) - Fixed an issue that battler's movement is too fast.
+ * 2016.10.29 (v1.1.6) - Added the function that allows you to specify the maximum number of character for an input field.
+ * 2016.11.13 (v1.1.6a) - Fixed the issue that is directly calling the requestUpdate function of SceneManager.
+ * 2016.12.02 (v1.1.6e) :
+ * - Added some style codes such as a text shadow and an outline into the text box.
+ * - Fixed the way that can temporarily stop attack and skill actions with an enemy when the text box is activated in the battle.
+ * - It will not process the text input when the text box is not shown in the battle.
+ * - In the debug mode, It adds the result value to a log window after the text input is done.
+ * 2016.12.08 (v1.1.6h) - Removed the text hint window.
+ * 2016.12.17 (v1.1.6i) - Fixed an issue that an integer value could not be checked due to the text type issue.
+ * 2017.01.30 (v1.1.7) - Fixed an issue that is not working properly if the text dialog has a string to start with a number.
+ * 2017.02.16 (v1.1.8) :
+ * - Fixed incorrect position and width, height values in the text box.
+ * - Added new feature that indicates the input dialog at the top position of the screen when pressing any key on your own mobile device.
+ * - Added new feature that automatically returns a result of the text box if you did not press anything.
+ * 2018.01.25 (v1.1.8a) - test...
+ * 2018.01.30 (v1.1.9) :
+ * - Added the button called 'OK'.
+ * - Added the button called 'Cancel'.
+ * - Removed the feature that can change the background-color of the input dialog.
+ * - Fixed the issue that is not clicking the button in the mobile.
+ * 2018.02.03 (v1.1.10) :
+ * - Fixed the issue that is not working in RMMV 1.5.1
+ * - Fixed the default value of the plugin parameter  called 'CSS'.
+ * 2018.02.06 (v1.1.11) :
+ * - Fixed the issue that is not working in the battle scene.
+ * 2018.10.22 (v1.1.15) :
+ * - Added a plugin command that sets the position of the input dialog.
+ * - Added a feature that the keyboard layout is displayed again if you touch the text box from android devices.
+ * - On the mobile device, the font size is now set to 1rem (16px).
+ * - Fixed the default UI-theme is to black.
+ * - In the chromium 69+ more over, The input element is always displayed even though <canvas>'s z-index is large than <input> element's z-index. so I've fixed that.
+ * 2019.03.05 (v1.1.16) :
+ * - Fixed the issue that can not create a background when using Irina_PerformanceUpgrade.
+ * 2020.08.28 (v2.0.0) : 
+ * - Ported with MZ.
  * 
  * @command open
  * @desc Opens Input Dialog.
@@ -239,7 +287,6 @@
  *
  * @help
  * 텍스트 입력창 MZ 버전입니다.
- * <input> element의 CSS를 변경할 예정입니다.
  *
  * @command open
  * @text 입력창 열기
@@ -364,7 +411,7 @@ RS.Utils = RS.Utils || {};
     RS.InputDialog.Params.exStyle = RS.Utils.jsonParse(parameters['CSS']);
 
     RS.InputDialog.Params.pos = new PIXI.Point(0, 0);
-    RS.InputDialog.Params.isCenterAlignment = (function () {
+    RS.InputDialog.Params.isCenterAlignment = (() => {
 
         let position = parameters['Position'];
         position = position.trim();
@@ -385,53 +432,57 @@ RS.Utils = RS.Utils || {};
     // public methods in RS.InputDialog
     //============================================================================
 
-    RS.InputDialog.createInstance = function () {
-        const scene = SceneManager._scene;
-        if (scene instanceof Scene_Battle) {
-            scene.showTextBox();
-        } else {
-            SceneManager.push(Scene_InputDialog);
+    Object.assign(RS.InputDialog, {
+
+        createInstance() {
+            const scene = SceneManager._scene;
+            if (scene instanceof Scene_Battle) {
+                scene.showTextBox();
+            } else {
+                SceneManager.push(Scene_InputDialog);
+            }
+        },
+    
+        setRect() {
+            "use strict";
+    
+            let query, textBox, OkButton, CancelButton;
+    
+            query = `div#${RS.InputDialog.Params.szFieldId} table.inputDialogContainer tr td input[type=text]`;
+            textBox = document.querySelector(query);
+    
+            query = `div#${RS.InputDialog.Params.szFieldId} table.inputDialogContainer tr td input[type=button][id=inputDialog-OkBtn]`;
+            OkButton = document.querySelector(query);
+    
+            query = `div#${RS.InputDialog.Params.szFieldId} table.inputDialogContainer tr td input[type=button][id=inputDialog-CancelBtn]`;
+            CancelButton = document.querySelector(query);
+    
+            if (textBox) {
+                textBox.style.fontSize = (Utils.isMobileDevice()) ? '1rem' : (2 * Graphics._realScale) + "em";
+                textBox.style.width = RS.InputDialog.getScreenWidth(RS.InputDialog.Params.textBoxWidth * Graphics._realScale) + 'px';
+                textBox.style.height = RS.InputDialog.getScreenHeight(RS.InputDialog.Params.textBoxHeight * Graphics._realScale) + 'px';
+            }
+    
+            if (OkButton) OkButton.style.fontSize = (Utils.isMobileDevice()) ? '1rem' : (1 * Graphics._realScale) + "em";
+            if (CancelButton) CancelButton.style.fontSize = (Utils.isMobileDevice()) ? '1rem' : (1 * Graphics._realScale) + "em";
+    
+        },
+    
+        startBattleBlur(target, value) {
+            var blur = "blur(%1px)".format(value);
+            target.style.webkitFilter = blur;
+            target.style.filter = blur;
+        },
+    
+        getScreenWidth(value) {
+            return value;
+        },
+    
+        getScreenHeight(value) {
+            return value;
         }
-    };
 
-    RS.InputDialog.setRect = function () {
-        "use strict";
-
-        let query, textBox, OkButton, CancelButton;
-
-        query = `div#${RS.InputDialog.Params.szFieldId} table.inputDialogContainer tr td input[type=text]`;
-        textBox = document.querySelector(query);
-
-        query = `div#${RS.InputDialog.Params.szFieldId} table.inputDialogContainer tr td input[type=button][id=inputDialog-OkBtn]`;
-        OkButton = document.querySelector(query);
-
-        query = `div#${RS.InputDialog.Params.szFieldId} table.inputDialogContainer tr td input[type=button][id=inputDialog-CancelBtn]`;
-        CancelButton = document.querySelector(query);
-
-        if (textBox) {
-            textBox.style.fontSize = (Utils.isMobileDevice()) ? '1rem' : (2 * Graphics._realScale) + "em";
-            textBox.style.width = RS.InputDialog.getScreenWidth(RS.InputDialog.Params.textBoxWidth * Graphics._realScale) + 'px';
-            textBox.style.height = RS.InputDialog.getScreenHeight(RS.InputDialog.Params.textBoxHeight * Graphics._realScale) + 'px';
-        }
-
-        if (OkButton) OkButton.style.fontSize = (Utils.isMobileDevice()) ? '1rem' : (1 * Graphics._realScale) + "em";
-        if (CancelButton) CancelButton.style.fontSize = (Utils.isMobileDevice()) ? '1rem' : (1 * Graphics._realScale) + "em";
-
-    };
-
-    RS.InputDialog.startBattleBlur = function (target, value) {
-        var blur = "blur(%1px)".format(value);
-        target.style.webkitFilter = blur;
-        target.style.filter = blur;
-    };
-
-    RS.InputDialog.getScreenWidth = function (value) {
-        return value;
-    };
-
-    RS.InputDialog.getScreenHeight = function (value) {
-        return value;
-    };
+    });
 
     //============================================================================
     // Input
@@ -497,6 +548,10 @@ RS.Utils = RS.Utils || {};
           resize : both;
           font-size: 16px!important;
       }
+
+      .inputDialogContainer > tr:last-child {
+            position:relative;
+      }
       
       .inputDialog {
           top : 0em;
@@ -506,12 +561,13 @@ RS.Utils = RS.Utils || {};
           z-index : 1000;
           opacity : 0.8;
           position : relative;
-          background-color : #ffffff;
-          border : 2px solid #414141;
+          background-image: 
+            linear-gradient(to bottom, #ccc, white 50%, #ccc);
+          border : 2px solid #ccc;
           border-radius : 10px;
           text-shadow : 0px 1px 3px #696969;
           font-family : arial;
-          color : #1a1a1a;
+          font-weight: bold;
           outline : none;
           font-size: 1rem!important;
       }
@@ -519,15 +575,14 @@ RS.Utils = RS.Utils || {};
       .defaultButton {
           opacity : 0.8;
           font-family : arial;
-          border : 1px solid rgb(73, 73, 73);
+          border : 2px solid #ccc;
           background-image: 
-            -webkit-linear-gradient(top, rgba(255,255,255,.2) 0%, rgba(255,255,255,0) 100%),
-            -moz-linear-gradient(top, rgba(255,255,255,.2) 0%, rgba(255,255,255,0) 100%),
-            -o-linear-gradient(top, rgba(255,255,255,.2) 0%, rgba(255,255,255,0) 100%);
+            linear-gradient(to bottom, #ffffff 0%, #f4f4f4 100%);
           color : rgb(19, 19, 19);
           text-shadow : rgba(105, 105, 105, 0.7) 0 1px 0;
           cursor : pointer;
-          border-radius : 0.5em;
+          color: #9c9c9c;
+          border-radius: 5px;
           box-sizing : border-box;
           box-shadow : 0 1px 4px rgba(78, 78, 78, 0.6);
           font-size : 1rem!important;
@@ -970,117 +1025,114 @@ RS.Utils = RS.Utils || {};
     // Game_Troop
     //============================================================================
 
-    Game_Troop.prototype.battleInterpreterTaskLock = function () {
-        this._interpreter._waitMode = 'IME Mode';
-    };
-
-    Game_Troop.prototype.battleInterpreterTaskUnlock = function () {
-        this._interpreter._waitMode = '';
-    };
+    Object.assign(Game_Troop.prototype, {
+        battleInterpreterTaskLock() {
+            this._interpreter._waitMode = 'IME Mode';
+        },
+        battleInterpreterTaskUnlock() {
+            this._interpreter._waitMode = '';
+        }
+    });
 
     //============================================================================
     // Scene_Battle
     //============================================================================
 
     const alias_Scene_Battle_initialize = Scene_Battle.prototype.initialize;
-    Scene_Battle.prototype.initialize = function () {
-        alias_Scene_Battle_initialize.call(this);
-        this.createTextBox();
-    };
-
     const alias_Scene_Battle_create = Scene_Battle.prototype.create;
-    Scene_Battle.prototype.create = function () {
-        alias_Scene_Battle_create.call(this);
-    };
-
     const alias_Scene_Battle_update = Scene_Battle.prototype.update;
-    Scene_Battle.prototype.update = function () {
-        alias_Scene_Battle_update.call(this);
-        // TODO: 모바일에서 취소키를 누르면 키입력 창이 사라지는 버그가 있다.
-        // 그래서 추가했지만 화면을 누르면 꺼진다는 것을 모르는 유저들이 버그로 착각할 수 있다.
-        if (this.isScreenLock() && TouchInput.isTriggered()) {
-            this.okResult();
-        }
-    };
-
     const alias_Scene_Battle_terminate = Scene_Battle.prototype.terminate;
-    Scene_Battle.prototype.terminate = function () {
-        alias_Scene_Battle_terminate.call(this);
-        if (this._textBox) {
-            this._textBox.terminate();
-            this._textBox = null;
-        }
-        if ($gameTemp.isCommonEventReserved()) {
-            $gameTemp.clearCommonEvent();
-        }
-    };
 
-    Scene_Battle.prototype.createTextBox = function () {
-        this._textBox = new TextBox(RS.InputDialog.Params.szFieldId, RS.InputDialog.Params.szTextBoxId);
-        this._textBox.setEvent(this.okResult.bind(this), this.cancelResult.bind(this));
-    };
+    Object.assign(Scene_Battle.prototype, {
 
-    Scene_Battle.prototype.textBoxIsBusy = function () {
-        return this._textBox.isBusy();
-    };
-
-    Scene_Battle.prototype.showTextBox = function () {
-        this._textBox.setText('');
-        this._textBox.show();
-        this._textBox.getFocus();
-        this._textBox.setTextHint();
-        this._textBox.setRect();
-        this._textBox.onResize();
-        $gameTroop.battleInterpreterTaskLock();
-        this._textBox.addAllEventListener();
-    };
-
-    Scene_Battle.prototype.hideTextBox = function () {
-        if (!this.textBoxIsBusy()) return false;
-        this._textBox.hide();
-        Input.clear();
-        $gameTroop.battleInterpreterTaskUnlock();
-    };
-
-    Scene_Battle.prototype.isScreenLock = function () {
-        return this._textBox.isScreenLock();
-    };
-
-    Scene_Battle.prototype.okResult = function () {
-        if (!this._textBox) return '';
-        if (this.textBoxIsBusy()) {
-            let text = this._textBox.getText() || '';
-            if (text.match(/^([\d]+)$/g)) text = Number(RegExp.$1);
-            $gameVariables.setValue(RS.InputDialog.Params.variableID, text);
-            this._textBox.setText('');
-            if (RS.InputDialog.Params.debug) {
-                const dmsg = 'You typed the text is same as '.concat($gameVariables.value(RS.InputDialog.Params.variableID) + '' || 'NONE');
-                this._logWindow.push('addText', dmsg);
+        initialize() {
+            alias_Scene_Battle_initialize.call(this);
+            this.createTextBox();
+        },
+    
+        create() {
+            alias_Scene_Battle_create.call(this);
+        },
+    
+        update() {
+            alias_Scene_Battle_update.call(this);
+            // TODO: 모바일에서 취소키를 누르면 키입력 창이 사라지는 버그가 있다.
+            // 그래서 추가했지만 화면을 누르면 꺼진다는 것을 모르는 유저들이 버그로 착각할 수 있다.
+            if (this.isScreenLock() && TouchInput.isTriggered()) {
+                this.okResult();
             }
-            this.hideTextBox();
-        }
-    };
-
-    Scene_Battle.prototype.cancelResult = function () {
-        if (!this._textBox) return '';
-        if (this.textBoxIsBusy()) {
+        },
+    
+        terminate() {
+            alias_Scene_Battle_terminate.call(this);
+            if (this._textBox) {
+                this._textBox.terminate();
+                this._textBox = null;
+            }
+            if ($gameTemp.isCommonEventReserved()) {
+                $gameTemp.clearCommonEvent();
+            }
+        },
+    
+        createTextBox() {
+            this._textBox = new TextBox(RS.InputDialog.Params.szFieldId, RS.InputDialog.Params.szTextBoxId);
+            this._textBox.setEvent(this.okResult.bind(this), this.cancelResult.bind(this));
+        },
+    
+        textBoxIsBusy() {
+            return this._textBox.isBusy();
+        },
+    
+        showTextBox() {
             this._textBox.setText('');
-            this.hideTextBox();
+            this._textBox.show();
+            this._textBox.getFocus();
+            this._textBox.setTextHint();
+            this._textBox.setRect();
+            this._textBox.onResize();
+            $gameTroop.battleInterpreterTaskLock();
+            this._textBox.addAllEventListener();
+        },
+    
+        hideTextBox() {
+            if (!this.textBoxIsBusy()) return false;
+            this._textBox.hide();
+            Input.clear();
+            $gameTroop.battleInterpreterTaskUnlock();
+        },
+    
+        isScreenLock() {
+            return this._textBox.isScreenLock();
+        },
+    
+        okResult() {
+            if (!this._textBox) return '';
+            if (this.textBoxIsBusy()) {
+                let text = this._textBox.getText() || '';
+                if (text.match(/^([\d]+)$/g)) text = Number(RegExp.$1);
+                $gameVariables.setValue(RS.InputDialog.Params.variableID, text);
+                this._textBox.setText('');
+                if (RS.InputDialog.Params.debug) {
+                    const dmsg = 'You typed the text is same as '.concat($gameVariables.value(RS.InputDialog.Params.variableID) + '' || 'NONE');
+                    this._logWindow.push('addText', dmsg);
+                }
+                this.hideTextBox();
+            }
+        },
+    
+        cancelResult() {
+            if (!this._textBox) return '';
+            if (this.textBoxIsBusy()) {
+                this._textBox.setText('');
+                this.hideTextBox();
+            }
         }
-    };
+        
+    });
 
     //============================================================================
-    // Game_Interpreter
-    //============================================================================
-
-    const alias_Game_Interpreter_updateWaitMode = Game_Interpreter.prototype.updateWaitMode;
-    Game_Interpreter.prototype.updateWaitMode = function () {
-        if (this._waitMode === 'IME Mode') {
-            return true;
-        } else {
-            return alias_Game_Interpreter_updateWaitMode.call(this);
-        }
-    };
+    // RS.InputDialog.isEqual
+    //============================================================================    
 
     RS.InputDialog.isEqual = function (eq) {
         const data = String($gameVariables.value(RS.InputDialog.Params.variableID));
@@ -1088,9 +1140,27 @@ RS.Utils = RS.Utils || {};
         return (data === eq);
     };
 
-    Game_Interpreter.prototype.isEqualInputData = function (eq) {
-        return RS.InputDialog.isEqual(eq);
-    };
+    //============================================================================
+    // Game_Interpreter
+    //============================================================================
+
+    const alias_Game_Interpreter_updateWaitMode = Game_Interpreter.prototype.updateWaitMode;
+
+    Object.assign(Game_Interpreter.prototype, {
+
+        updateWaitMode() {
+            if (this._waitMode === 'IME Mode') {
+                return true;
+            } else {
+                return alias_Game_Interpreter_updateWaitMode.call(this);
+            }
+        },
+        
+        isEqualInputData(eq) {
+            return RS.InputDialog.isEqual(eq);
+        }
+
+    });
 
     //============================================================================
     // Plugin Commands

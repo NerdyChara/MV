@@ -10,7 +10,7 @@
  * RS_HUD_4m_InBattle.js
  * @target MZ
  * @base RS_HUD_4m
- * @plugindesc (v2.0.0) <RS_HUD_4m_InBattle>
+ * @plugindesc (v2.0.1) <RS_HUD_4m_InBattle>
  * @author biud436
  * @url biud436.tistory.com
  *
@@ -173,7 +173,9 @@
  * 2018.05.09 (v1.2.5) - Fixed an issue that is not showing the image after it has been added.
  * 2019.11.19 (v1.2.6) :
  * - Supported a plugin called 'MPP_ActiveTimeBattle'
- * 2020.08.30 (v2.0.0) - This plugin is now also available in MZ
+ * 2020.08.30 (v2.0.1) : 
+ * - This plugin is now also available in MZ.
+ * - Fixed the issue that is not displayed a state icon on the hud.
  */
 
 var Imported = Imported || {};
@@ -358,7 +360,7 @@ RS.HUD.param = RS.HUD.param || {};
     
         createAllIcon() {
             this._Iconlayer = new Sprite(new Bitmap(Graphics.width, Graphics.height));
-            this._Iconlayer.x = (this._levelText.x - this._hud.x) + 32;
+            this._Iconlayer.x = ImageManager.faceWidth + 10;
             this._hud.addChild(this._Iconlayer);
         },
     
@@ -421,7 +423,7 @@ RS.HUD.param = RS.HUD.param || {};
             const bitmap = ImageManager.loadSystem('IconSet');
             const pw = ImageManager.iconWidth;
             const ph = ImageManager.iconHeight;
-            const sx = iconIndex % 16 * pw;
+            const sx = (iconIndex % 16) * pw;
             const sy = Math.floor(iconIndex / 16) * ph;
             this._Iconlayer.bitmap.blt(bitmap, sx, sy, pw, ph, x, y);
         },
@@ -495,11 +497,11 @@ RS.HUD.param = RS.HUD.param || {};
     Scene_Battle.prototype.createAllWindows = function () {
         Scene_Battle_createAllWindows.call(this);
         if (RS.HUD.param.isWndsAlignment) {
-            this._windowLayer.children.forEach(function (i) {
+            this._windowLayer.children.forEach(i => {
                 if (!(i === this._logWindow || i === this._helpWindow)) {
                     i.y = Graphics.height / 2 - i.height / 2;
                 }
-            }, this);
+            });
         }
     };
 
@@ -507,9 +509,9 @@ RS.HUD.param = RS.HUD.param || {};
     // Window_BattleStatus
     //=================================================
 
-    const alias_Window_BattleStatus_refresh = Window_BattleStatus.prototype.refresh;
-    Window_BattleStatus.prototype.refresh = function () {
-        alias_Window_BattleStatus_refresh.call(this);
+    const alias_Window_BattleStatus_update = Window_BattleStatus.prototype.update;
+    Window_BattleStatus.prototype.update = function() {
+        alias_Window_BattleStatus_update.call(this);
         if (!$gameHud) return;
         $gameHud._items.children.forEach(i => i.refreshIcon());
     };
@@ -644,7 +646,5 @@ RS.HUD.param = RS.HUD.param || {};
             this._AtbArrow.bitmap.blt(bitmap, 132, 24, 20, 20, 0, 0);
         },
     });
-
-
 
 })();

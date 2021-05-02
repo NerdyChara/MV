@@ -7,8 +7,10 @@
 // Free for commercial and non commercial use.
 //================================================================
 /*:
+ * @target MZ
  * @plugindesc This plugin allows you to show up the animation face in the messsage window <RS_FaceAnimation>
  * @author biud436
+ * @url https://blog.naver.com/biud436
  * 
  * @param Set Animation Face
  * @type struct<AnimationFace>[]
@@ -68,12 +70,12 @@
  * This plugin provides a toggle functionality for animated face.
  * if you use this plugin command, you can show up an animated face in the message window.
  * 
- * ShowAnimationFace
+ * + show
  * 
  * You wish to hide the animated face after it indicates on the screen.
  * it is returned back as a normal face if you use this plugin command.
  * 
- * HideAnimationFace
+ * + hide
  * 
  * This plugin will be checked the ID value of activated face 
  * and then show up it when the next message opens up.
@@ -81,13 +83,15 @@
  * it will be already set in the plugin parameter called 'Set Animation Face'
  * The ID value should be changed as your own purposes.
  * 
- * SetAnimationFace Id
+ * + set
+ *  - id : blink
  * 
  * For example, there is the face ID called 'blink' into it
  * and you can use like this before the message window starts up, as follows.
  * 
- * ShowAnimationFace
- * SetAnimationFace blink
+ * + show
+ * + set 
+ *  - id : char
  * 
  * Next, you need to select the face image from the event command called 'Show Message'
  * then, The animated face system makes to add all the frames for that image
@@ -102,35 +106,73 @@
  * You must do like this.
  * You have passed angle 60.0 in to the plugin command called 'ChangeParamAnimationFace'
  * 
- * ChangeParamAnimationFace angle 60.0
+ * change
+ *  - angle : 60.0
  * 
  * into the message window, the position of the animated-face image is basically the 
  * relative coordinates to parent message window.
  * So its coordinates are (0, 0) px.
  * 
- * ChangeParamAnimationFace x 0.0
- * ChangeParamAnimationFace y 0.0
+ * change 
+ *  - x : 0.0
+ * change 
+ *  - y : 0.0
  * 
  * and you can also apply the padding value into it, like this.
  * 
- * ChangeParamAnimationFace x 18.0
- * ChangeParamAnimationFace y 18.0
+ * change 
+ *  - x : 18.0
+ * change
+ *  - y : 18.0
  * 
  * In this part, You'll learn how to change a scale of the animated face sprite.
  * 
  * To scale the animated face, you passed scale to the plugin command ChangeParamAnimationFace,
  * like this.
  * 
- * ChangeParamAnimationFace scale 1.0
+ * change 
+ *  - scale : 1.0
  * 
  * The 1.0 is the default scale and 2.0 is to zoom in by double.
  * 
  * ================================================================
  * Change Log
  * ================================================================
- * 2019.07.16 (v1.0.0) - First Release.
- * 2019.07.17 (v1.0.1) :
- * - Fixed the issue that shows up the incorrect frame in the sprite sheet.
+ * 2021.04.18 (v1.0.0) - First Release.
+ * 
+ * @command show
+ * @text Show Animation
+ * @desc if you use this plugin command, you can show up an animated face in the message window.
+ * 
+ * @command hide
+ * @text Remove Animation
+ * @desc This command allows you to remove face animation.
+ * 
+ * @command set
+ * @text Set State
+ * @desc Specify a certain state.
+ * 
+ * @arg id
+ * @text id
+ * @desc Specify the desired state name.
+ * (Ex: blink)
+ * @default blink
+ * 
+ * @command change
+ * @text Change Parameters
+ * @desc This command allows you to change global parameters (x, y, angle, scale)
+ * 
+ * @arg stateName
+ * @text Parameters
+ * @type string
+ * @desc (Available Parameters : x, y, angle, scale)
+ * @default none
+ * 
+ * @arg value
+ * @text value
+ * @type number
+ * @desc it is possible to change parameters such as x, y, angle, scale
+ * @default 0
  */
 /*~struct~AnimationFace:
  *
@@ -183,8 +225,10 @@
  *
  */
 /*:ko
+ * @target MZ
  * @plugindesc This plugin allows you to show up the animation face in the messsage window <RS_FaceAnimation>
  * @author biud436
+ * @url https://blog.naver.com/biud436
  * 
  * @param Set Animation Face
  * @type struct<AnimationFace>[]
@@ -193,36 +237,38 @@
  * 
  * @help
  * ================================================================
- * How to Use
+ * 사용법 (MV)
  * ================================================================
  * 
  * 애니메이션 얼굴 이미지와 일반 얼굴 이미지를 토글하려면 다음과 같은 플러그인 명령을 사용해야 합니다.
  * 
- * ShowAnimationFace
+ * show
  * 
  * 기본적으로 토글 상태이므로 다음 플러그인 명령을 호출하면 일반 얼굴 이미지가 묘화됩니다.
  * 
- * HideAnimationFace
+ * hide
  * 
  * 애니메이션 얼굴 이미지의 설정 정보는 Set Animation Face 매개변수에서 설정합니다.
  * AnimationFace에는 ID 값이 존재합니다. 
  * ID는 빠르게 데이터를 취득 하기 위해 존재하는 데이터 식별 값으로 ID라고 부릅니다.
  * 이 값은 문자열이나 숫자 값 등을 지정할 수 있습니다.
  * 
- * SetAnimationFace Id
+ * set 
+ *  - id : blink
  * 
  * 예를 들어, 매개변수에서 char라는 Id 값에 해당하는 JSON 데이터를 만들어놓았다고 가정합니다.
  * 이 경우에는 문장의 표시를 호출하기 전에 다음 플러그인 명령을 사용해야 합니다.
  * 
- * ShowAnimationFace
- * SetAnimationFace char
+ * show
+ * set
+ *  - id : char
  * 
  * 문장의 표시에선 해당 얼굴 이미지를 찾아 선택해야 합니다.
  * 옵션 정보에 맞게 얼굴 이미지를 자르고 프레임을 만들기 때문입니다.
  * 
  * 혹 다시 일반 얼굴 이미지를 사용하고 싶다면, 다음 플러그인 명령을 호출해야 합니다.
  * 
- * HideAnimationFace
+ * hie
  * 
  * 위 명령을 호출하면 다시 기본 상태로 되돌아갈 것입니다.
  * 
@@ -232,19 +278,23 @@
  * 
  * 예를 들어,스프라이트를 60도 회전을 시키고 싶다면 다음과 같이 해야 합니다.
  * 
- * ChangeParamAnimationFace angle 60.0
+ * change
+ *  - angle : 60.0
  * 
  * 메시지 윈도우 내에서 애니메이션 얼굴 이미지의 위치는 기본적으로
  * 메시지 윈도우의 상대 좌표로 결정됩니다. 
  * 따라서 상단 좌표는 0, 0 입니다.
  * 
- * ChangeParamAnimationFace x 0.0
- * ChangeParamAnimationFace y 0.0
+ * change 
+ *  - x : 0.0
+ * change
+ *  - y : 0.0
  * 
  * 애니메이션 얼굴 이미지의 크기는 scale 인자를 전달하여 조절이 가능한데요.
  * 1.0은 기본 스케일이며, 2.0은 두 배 확대입니다.
  * 
- * ChangeParamAnimationFace scale 1.0
+ * change 
+ *  - scale :  1.0
  * 
  * 다시 한 번 말하지만 위 인자들은 글로벌에 적용되기 때문에,
  * 이후에 표시되는 모든 얼굴 애니메이션에 적용되므로 조심히 사용하시기 바랍니다.
@@ -252,9 +302,40 @@
  * ================================================================
  * Change Log
  * ================================================================
- * 2019.07.16 (v1.0.0) - First Release.
- * 2019.07.17 (v1.0.1) :
- * - Fixed the issue that shows up the incorrect frame in the sprite sheet.
+ * 2021.04.18 (v1.0.0) - First Release.
+ * 
+ * @command show
+ * @text 애니메이션 있음
+ * @desc 셀을 순서대로 순회하며 애니메이션 모드로 동작시킵니다.
+ * 
+ * @command hide
+ * @text 애니메이션 없음
+ * @desc 애니메이션을 제거합니다.
+ * 
+ * @command set
+ * @text 상태 설정
+ * @desc 특정 상태로 설정합니다.
+ * 
+ * @arg id
+ * @text id
+ * @desc 상태를 설정합니다.
+ * @default blink
+ * 
+ * @command change
+ * @text 매개변수 변경
+ * @desc 글로벌 매개변수를 변경합니다.
+ * 
+ * @arg stateName
+ * @text 매개변수 명
+ * @type string
+ * @desc (사용 가능한 매개변수명 : x, y, angle, scale)
+ * @default none
+ * 
+ * @arg value
+ * @text value
+ * @type number
+ * @desc 조절 가능한 값 : x, y, angle, scale
+ * @default 0
  */
 /*~struct~AnimationFace:ko
  *
@@ -317,11 +398,12 @@ RS.FaceAnimation = RS.FaceAnimation || {};
 
     "use strict";
     
-    var parameters = $plugins.filter(function (i) {
-      return i.description.contains('<RS_FaceAnimation>');
-    });
+    const pluginParams = $plugins.filter(i => {
+        return i.description.contains('<RS_FaceAnimation>');
+    });    
     
-    parameters = (parameters.length > 0) && parameters[0].parameters;
+    const pluginName = (pluginParams.length > 0) && pluginParams[0].name;
+    const parameters = (pluginParams.length > 0) && pluginParams[0].parameters;
 
     $.jsonParse = function (str) {
     
@@ -750,8 +832,8 @@ RS.FaceAnimation = RS.FaceAnimation || {};
                 .setFrames(0, maxFrames)
                 .setVisible(true);
             
-            this.addChild(this._faceSprite);
-            ImageManager.releaseReservation(this._imageReservationId);
+            this._contentsSprite.addChild(this._faceSprite);
+
         } else {
             alias_Window_Message_drawMessageFace.call(this);
         }
@@ -761,31 +843,41 @@ RS.FaceAnimation = RS.FaceAnimation || {};
     Window_Message.prototype.terminateMessage = function() {
         alias_Window_Message_terminateMessage.call(this);
         if(this._faceSprite) {
-            this.removeChild(this._faceSprite);
+            this._contentsSprite.removeChild(this._faceSprite);
             this._faceSprite = null;
         }
     };
 
-    var alias_Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-    Game_Interpreter.prototype.pluginCommand = function(command, args) {
-        alias_Game_Interpreter_pluginCommand.call(this, command, args);
+    /**
+     * ================================================
+     * Plugin Commands
+     * ================================================
+     */
+    const pluginCommands = {
 
-        switch (command) {
-            case 'ShowAnimationFace':
-                $.Params.isAnimationFace = true;
-                break;
-            case 'HideAnimationFace':
-                $.Params.isAnimationFace = false;
-                break;
-            case 'SetAnimationFace':
-                const id = args[0];
-                $.Params.activeStateId = id;
-                break;
-            case 'ChangeParamAnimationFace':
-                $.Params.globalStates[args[0]] = Number(args[1]);
-                break;
+        show() {
+            $.Params.isAnimationFace = true;
+        },
+
+        hide() {
+            $.Params.isAnimationFace = false;
+        },
+
+        set(args) {
+            const id = args.id;
+            $.Params.activeStateId = id;
+        },
+
+        change(args) {
+            const name = args.stateName;
+            const value = Number(args.value);
+            $.Params.globalStates[name] = value;
         }
 
-    };    
+    };
+
+    for(let name in pluginCommands) {
+        PluginManager.registerCommand(pluginName, name, pluginCommands[name]);
+    }
 
 })(RS.FaceAnimation);

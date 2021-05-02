@@ -1,27 +1,24 @@
 {
-  "name": "mv",
+  "name": "mz",
   "version": "1.0.0",
-  "description": "This plugin package includes helpful features to get you on your way to create your game in RPG Maker MV.",
-  "main": "RS_AnimataionVisibility.js",
-  "directories": {
-    "doc": "docs",
-    "test": "test"
-  },
+  "description": "This plugin package includes helpful features to get you on your way to create your game in RPG Maker MZ.",
+  "main": "RS_Window_KorNameEdit.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/biud436/MV.git"
+    "url": "git+https://github.com/biud436/MZ.git"
   },
-  "author": "biud436",
+  "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/biud436/MV/issues"
+    "url": "https://github.com/biud436/MZ/issues"
   },
-  "homepage": "https://github.com/biud436/MV#readme",
+  "homepage": "https://github.com/biud436/MZ#readme",
   "dependencies": {
-    "iconv": "^2.3.5",
+    "comment-parser": "^0.7.6",
+    "fs-extra": "^9.0.1",
     "minimist": "^1.2.5"
   }
 }
